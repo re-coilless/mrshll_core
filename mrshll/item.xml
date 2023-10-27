@@ -1,0 +1,90 @@
+<Entity tags="mrshll_ctrl" >
+	<LuaComponent
+		_tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
+		script_source_file="mods/mrshll_core/sound_controller.lua"
+		execute_every_n_frame="1"
+		vm_type="ONE_PER_COMPONENT_INSTANCE"
+	></LuaComponent>
+	
+	<VariableStorageComponent
+		name="sound_bank"
+		value_string="mods/mrshll_core/mrshll.bank"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="sound_event"
+		value_string="default"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="sound_volume"
+		value_float="1"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="current_volume"
+		value_float="1"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="random_order"
+		value_bool="0"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="is_playing"
+		value_float="0"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="gonna_purge"
+		value_bool="0"
+	></VariableStorageComponent>
+
+	<VariableStorageComponent
+		name="time_sync"
+		value_float="0"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="playlist_num"
+		value_int="1"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="played_songs"
+		value_string=""
+	></VariableStorageComponent>
+
+	<VariableStorageComponent
+		name="ignored_songs_1"
+		value_string="@"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="ignored_songs_2"
+		value_string="@"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="ignored_songs_3"
+		value_string="@"
+	></VariableStorageComponent>
+	
+	<VariableStorageComponent
+		name="ordered_songs_1"
+		value_string="@"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="ordered_songs_2"
+		value_string="@"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="ordered_songs_3"
+		value_string="@"
+	></VariableStorageComponent>
+	
+	<LuaComponent
+		_tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
+		script_source_file="mods/mrshll_core/mrshll/controller.lua"
+		execute_every_n_frame="1"
+		vm_type="ONE_PER_COMPONENT_INSTANCE"
+	></LuaComponent>
+</Entity>
