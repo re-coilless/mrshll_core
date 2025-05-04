@@ -1,12 +1,17 @@
 ModRegisterAudioEventMappings( "mods/mrshll_core/GUIDs.txt" )
 
+function OnWorldPreUpdate()
+	if( not( ModIsEnabled( "mnee" ))) then
+		GamePrint( "[M-NEE IS REQUIRED] - check steam page description" )
+	end
+end
+
 function OnPlayerSpawned( hooman )
-	dofile_once( "mods/mrshll_core/lib.lua" )
+	if( not( ModIsEnabled( "mnee" ))) then return end
+	dofile_once( "mods/mnee/_penman.lua" )
 	
 	local initer = "HERMES_MARSHALL_MOMENT"
-	if( GameHasFlagRun( initer )) then
-		return
-	end
+	if( GameHasFlagRun( initer )) then return end
 	GameAddFlagRun( initer )
 	
 	GlobalsSetValue( "HERMES_IS_REAL", "1" )
@@ -14,19 +19,16 @@ function OnPlayerSpawned( hooman )
 	local mode = ModSettingGetNextValue( "mrshll_core.ITEM_INIT" )
 	if( mode < 4 ) then
 		local x, y = EntityGetTransform( hooman )
-		
 		local override = ModIsEnabled( "white_room" ) and mode < 3
-		if( override ) then
-			x, y = 1727, 5328
-		end
+		if( override ) then x, y = 1727, 5328 end
 		
 		local controller = EntityLoad( "mods/mrshll_core/mrshll/item.xml", x, y )
-		ComponentSetValue2( get_storage( controller, "sound_volume" ), "value_float", ModSettingGetNextValue( "mrshll_core.VOLUME" ))
-		ComponentSetValue2( get_storage( controller, "random_order" ), "value_bool", ModSettingGetNextValue( "mrshll_core.IS_SHUFFLED" ) or false )
-		ComponentSetValue2( get_storage( controller, "playlist_num" ), "value_int", ModSettingGetNextValue( "mrshll_core.PLAYLIST" ))
+		pen.magic_storage( controller, "sound_volume", "value_float", ModSettingGetNextValue( "mrshll_core.VOLUME" ))
+		pen.magic_storage( controller, "random_order", "value_bool", ModSettingGetNextValue( "mrshll_core.IS_SHUFFLED" ) or false )
+		pen.magic_storage( controller, "playlist_num", "value_int", ModSettingGetNextValue( "mrshll_core.PLAYLIST" ))
 		for i = 1,3 do
-			ComponentSetValue2( get_storage( controller, "ignored_songs_"..i ), "value_string", ModSettingGetNextValue( "mrshll_core.IGNORE_LIST_"..i ))
-			ComponentSetValue2( get_storage( controller, "ordered_songs_"..i ), "value_string", ModSettingGetNextValue( "mrshll_core.ORDER_LIST_"..i ))
+			pen.magic_storage( controller, "ignored_songs_"..i, "value_string", ModSettingGetNextValue( "mrshll_core.IGNORE_LIST_"..i ))
+			pen.magic_storage( controller, "ordered_songs_"..i, "value_string", ModSettingGetNextValue( "mrshll_core.ORDER_LIST_"..i ))
 		end
 		if( mode < 3 ) then
 			EntityAddTag( controller, "teleportable_NOT" )
@@ -74,7 +76,7 @@ function OnPlayerSpawned( hooman )
 				is_pickable = "1",
 				is_equipable_forced = "1",
 				always_use_item_name_in_ui = "1",
-				ui_sprite = "mods/mrshll_core/mrshll/item_ui.png",
+				ui_sprite = "mods/mrshll_core/mrshll/anim/1.png",
 				ui_description = "Manufactured by Hermeneutics Superior FRC.\nIt shimmers with tunes.",
 				play_spinning_animation = "0",
 			}), "preferred_inventory", "QUICK" )
@@ -111,7 +113,13 @@ function OnPlayerSpawned( hooman )
 			ComponentSetValue2( steam, "randomize_scale", -0.1, -0.1, 0.1, 0.1 )
 			ComponentSetValue2( steam, "color", 199/255, 220/255, 208/255, 0.3 )
 			ComponentSetValue2( steam, "color_change", 0.03, 0.03, 0.03, -0.03 )
-			
+
+			EntityAddComponent( controller, "VariableStorageComponent",
+			{
+				name = "index_pic_anim",
+				value_string = "|mods/mrshll_core/mrshll/anim/|5|1|",
+			})
+
 			if( override ) then
 				GamePrint( "::Injection Protocol Override:: Destination set to [THE CHAMBER]" )
 				EntitySetTransform( controller, x, y, 0, -1, 1 )
