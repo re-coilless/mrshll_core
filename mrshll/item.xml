@@ -17,18 +17,8 @@
 	></VariableStorageComponent>
 	
 	<VariableStorageComponent
-		name="sound_volume"
-		value_float="1"
-	></VariableStorageComponent>
-	
-	<VariableStorageComponent
 		name="current_volume"
 		value_float="1"
-	></VariableStorageComponent>
-	
-	<VariableStorageComponent
-		name="random_order"
-		value_bool="0"
 	></VariableStorageComponent>
 	
 	<VariableStorageComponent
@@ -46,39 +36,8 @@
 	></VariableStorageComponent>
 	
 	<VariableStorageComponent
-		name="playlist_num"
-		value_int="1"
-	></VariableStorageComponent>
-	
-	<VariableStorageComponent
-		name="played_songs"
+		name="playlist"
 		value_string=""
-	></VariableStorageComponent>
-
-	<VariableStorageComponent
-		name="ignored_songs_1"
-		value_string="@"
-	></VariableStorageComponent>
-	<VariableStorageComponent
-		name="ignored_songs_2"
-		value_string="@"
-	></VariableStorageComponent>
-	<VariableStorageComponent
-		name="ignored_songs_3"
-		value_string="@"
-	></VariableStorageComponent>
-	
-	<VariableStorageComponent
-		name="ordered_songs_1"
-		value_string="@"
-	></VariableStorageComponent>
-	<VariableStorageComponent
-		name="ordered_songs_2"
-		value_string="@"
-	></VariableStorageComponent>
-	<VariableStorageComponent
-		name="ordered_songs_3"
-		value_string="@"
 	></VariableStorageComponent>
 	
 	<LuaComponent

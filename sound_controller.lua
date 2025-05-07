@@ -45,7 +45,7 @@ if( is_playing ~= 0 ) then
 				ComponentSetValue2( comp_id, "file", pen.magic_storage( entity_id, "sound_bank", "value_string" ))
 				ComponentSetValue2( comp_id, "event_name",
 					pen.magic_storage( entity_id, "sound_event", "value_string" )..( i == 1 and "_l" or "_r" ))
-				ComponentSetValue2( comp_id, "m_volume", pen.magic_storage( entity_id, "sound_volume", "value_float" ))
+				ComponentSetValue2( comp_id, "m_volume", pen.setting_get( "mrshll_core.VOLUME" ))
 				ComponentSetValue2( comp_id, "volume_autofade_speed", 0.25 )
 			end)
 		end

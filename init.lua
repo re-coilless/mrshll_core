@@ -2,7 +2,7 @@ ModRegisterAudioEventMappings( "mods/mrshll_core/GUIDs.txt" )
 
 function OnWorldPreUpdate()
 	if( not( ModIsEnabled( "mnee" ))) then
-		GamePrint( "[M-NEE IS REQUIRED] - check steam page description" )
+		GamePrint( "[M-NEE IS REQUIRED] - check the mod's page" )
 	end
 end
 
@@ -23,13 +23,6 @@ function OnPlayerSpawned( hooman )
 		if( override ) then x, y = 1727, 5328 end
 		
 		local controller = EntityLoad( "mods/mrshll_core/mrshll/item.xml", x, y )
-		pen.magic_storage( controller, "sound_volume", "value_float", ModSettingGetNextValue( "mrshll_core.VOLUME" ))
-		pen.magic_storage( controller, "random_order", "value_bool", ModSettingGetNextValue( "mrshll_core.IS_SHUFFLED" ) or false )
-		pen.magic_storage( controller, "playlist_num", "value_int", ModSettingGetNextValue( "mrshll_core.PLAYLIST" ))
-		for i = 1,3 do
-			pen.magic_storage( controller, "ignored_songs_"..i, "value_string", ModSettingGetNextValue( "mrshll_core.IGNORE_LIST_"..i ))
-			pen.magic_storage( controller, "ordered_songs_"..i, "value_string", ModSettingGetNextValue( "mrshll_core.ORDER_LIST_"..i ))
-		end
 		if( mode < 3 ) then
 			EntityAddTag( controller, "teleportable_NOT" )
 			EntityAddTag( controller, "item_physics" )
