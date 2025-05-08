@@ -1,4 +1,4 @@
-dofile_once( "mods/mnee/_penman.lua" )
+dofile_once( "mods/mnee/lib.lua" )
 
 local entity_id = GetUpdatedEntityID()
 local x, y = EntityGetTransform( entity_id )

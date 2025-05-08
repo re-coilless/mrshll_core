@@ -1,5 +1,25 @@
 ModRegisterAudioEventMappings( "mods/mrshll_core/GUIDs.txt" )
 
+if( ModIsEnabled( "mnee" )) then
+	ModLuaFileAppend( "mods/mnee/bindings.lua", "mods/mrshll_core/mnee.lua" )
+end
+
+function OnModInit()
+	if( not( ModIsEnabled( "mnee" ))) then return end
+	dofile_once( "mods/mnee/lib.lua" )
+	if( pen.vld( pen.setting_get( "mrshll_core.PLAYLIST" ))) then
+		GamePrint( "MRSHLL PURGE SUCCESSFUL" )
+		ModSettingRemove( "mrshll_core.PLAYLIST" )    
+		ModSettingRemove( "mrshll_core.WHITE_SONGS" )
+		ModSettingRemove( "mrshll_core.IGNORE_LIST_1" )
+		ModSettingRemove( "mrshll_core.IGNORE_LIST_2" )
+		ModSettingRemove( "mrshll_core.IGNORE_LIST_3" )
+		ModSettingRemove( "mrshll_core.ORDER_LIST_1" )
+		ModSettingRemove( "mrshll_core.ORDER_LIST_2" )
+		ModSettingRemove( "mrshll_core.ORDER_LIST_3" )
+	end
+end
+
 function OnWorldPreUpdate()
 	if( not( ModIsEnabled( "mnee" ))) then
 		GamePrint( "[M-NEE IS REQUIRED] - check the mod's page" )
@@ -8,7 +28,7 @@ end
 
 function OnPlayerSpawned( hooman )
 	if( not( ModIsEnabled( "mnee" ))) then return end
-	dofile_once( "mods/mnee/_penman.lua" )
+	dofile_once( "mods/mnee/lib.lua" )
 	
 	local initer = "HERMES_MARSHALL_MOMENT"
 	if( GameHasFlagRun( initer )) then return end
