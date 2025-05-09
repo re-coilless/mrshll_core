@@ -163,22 +163,73 @@ if( not( pen.vld( this_ordered ))) then
 	pen.setting_set( "mrshll_core.ORDER_LIST", pen.t.parse( ordered ))
 	pen.setting_set( "mrshll_core.IGNORE_LIST", pen.t.parse( ignored ))
 end
-if( playlist_update ~= false ) then
+
+local goners_order = {}
+local goners_ignore = {}
+if( playlist_update ) then
 	playlist_update = false
-	
-	local goners = {}
 	pen.t.loop( this_ordered, function( i, v )
 		local is_nuked = this_ignored[ v[2]] ~= nil
-		local is_real = pen.vld( pen.t.get( mrshll[ v[1]], v[2]))
+		local is_real = pen.vld( pen.t.get( mrshll[ v[1]], v[2], nil, nil, {}))
 		if( is_real and not( is_nuked )) then return end
-		table.insert( goners, i )
+		goners_order[ playlist_num ] = goners_order[ playlist_num ] or {}
+		table.insert( goners_order[ playlist_num ], i )
 	end)
-	
-	if( pen.vld( goners )) then
-		for i,v in ipairs( goners ) do table.remove( this_ordered, v ) end
-		ordered[ playlist_num ] = this_ordered
+elseif( playlist_update == nil ) then
+	playlist_update = false
+	pen.t.loop( ordered, function( k, o )
+		pen.t.loop( o, function( i, v )
+			local is_nuked = ignored[k][ v[2]] ~= nil
+			local is_real = pen.vld( pen.t.get( mrshll[ v[1]], v[2], nil, nil, {}))
+			if( is_real and not( is_nuked )) then return end
+			goners_order[k] = goners_order[k] or {}
+			table.insert( goners_order[k], i )
+		end)
+		pen.t.loop( ignored[k], function( i,_ )
+			if( pen.t.loop( mrshll, function( _,v )
+				if( pen.vld( pen.t.get( v, i, nil, nil, {}))) then return true end
+			end)) then return end
+			goners_ignore[k] = goners_ignore[k] or {}
+			table.insert( goners_ignore[k], i )
+		end)
+		
+		local temp = nil
+		for cat,v in pen.t.order( mrshll ) do
+			pen.t.loop( v, function( i, song )
+				local is_nuked = ignored[k][ song.id ] ~= nil
+				local is_present = pen.vld( pen.t.get( o, song.id, 2, nil, {}))
+				if( not( is_nuked or is_present )) then
+					temp = temp or pen.t.clone( o )
+					table.insert( temp, { cat, song.id })
+				end
+			end)
+		end
+		if( pen.vld( temp )) then
+			ordered[k] = temp
+			playlist_update = true
+		end
+	end)
+	if( playlist_update ) then
+		playlist_update = false
 		pen.setting_set( "mrshll_core.ORDER_LIST", pen.t.parse( ordered ))
 	end
+end
+
+if( pen.vld( goners_order )) then
+	pen.t.loop( goners_order, function( k, v )
+		local temp = pen.t.clone( ordered[k])
+		for e = #v,1,-1 do table.remove( temp, v[e]) end
+		ordered[k] = temp
+	end)
+	pen.setting_set( "mrshll_core.ORDER_LIST", pen.t.parse( ordered ))
+end
+if( pen.vld( goners_ignore )) then
+	pen.t.loop( goners_ignore, function( k, v )
+		local temp = pen.t.clone( ignored[k])
+		pen.t.loop( v, function( _, i ) temp[i] = nil end)
+		ignored[k] = temp
+	end)
+	pen.setting_set( "mrshll_core.IGNORE_LIST", pen.t.parse( ignored ))
 end
 
 if( gonna_play ) then
@@ -288,12 +339,12 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			new_x, new_y, state, _, r_clicked, is_hovered = pen.new_dragger( "mnee_window", pic_x, pic_y - 11, 10, 10 )
 			if( new_x ~= pic_x or new_y + 11 ~= pic_y ) then pen.setting_set( "mrshll_core.UI_POS", pen.t.pack({ new_x, new_y + 11 })) end
 			if( r_clicked ) then play_sound( "ass/special_button" ); is_moving = not( is_moving ) end
-			new_tooltip({ "Drag to Reposition", "RMB to lock" }, { is_active = is_hovered and state ~= 2 })
+			new_tooltip({ GameTextGet( "$mrshll_dragger_aa" ), GameTextGet( "$mrshll_dragger_ab" )}, { is_active = is_hovered and state ~= 2 })
 		end
 
 		_,r_clicked = new_button( pic_x, pic_y - 11, pic_z,
 			"mods/mrshll_core/mrshll/move_"..( is_moving and "B" or "A" )..".png", {
-			auid = "mrshll_move", tip = not( is_moving ) and { "RMB to Unlock", "Hide this in the settings" } or nil })
+			auid = "mrshll_move", tip = not( is_moving ) and { GameTextGet( "$mrshll_dragger_ba" ), GameTextGet( "$mrshll_dragger_bb" )} or nil })
 		if( r_clicked ) then
 			play_sound( "ass/special_button" )
 			is_moving = not( is_moving )
@@ -302,13 +353,13 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 	play = new_button( pic_x, pic_y, pic_z,
 		"mods/mrshll_core/mrshll/play_"..( gonna_play and "B" or "A" )..".png", {
-		auid = "mrshll_play", tip = gonna_play and "Stop" or "Start" })
+		auid = "mrshll_play", tip = gonna_play and GameTextGet( "$mrshll_stop" ) or GameTextGet( "$mrshll_play" )})
 	forward = new_button( pic_x, pic_y + 11, pic_z,
 		"mods/mrshll_core/mrshll/next.png", {
-		auid = "mrshll_next", tip = "Next Song" })
+		auid = "mrshll_next", tip = GameTextGet( "$mrshll_next" )})
 	volume_up, volume_down = new_button( pic_x, pic_y + 22, pic_z,
 		"mods/mrshll_core/mrshll/volume_"..( math.floor( 3.8*math.max( 1.5 - volume, 0 )))..".png", {
-		auid = "mrshll_volume", tip = { "Volume: "..math.floor( volume*100 + 0.5 ), "LMB/RMB to rise/lower." }})
+		auid = "mrshll_volume", tip = { GameTextGet( "$mrshll_volume_a" )..math.floor( volume*100 + 0.5 ), GameTextGet( "$mrshll_volume_b" )}})
 	
 	local text, genre, duration = "John Cage - 4'33\"", "Classical", 0
 	if( last_played > 0 ) then
@@ -321,7 +372,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	pen.new_image( pic_x + 12, pic_y, pic_z, "mods/mrshll_core/mrshll/window_B.png", { s_x = dist, s_y = 1 })
 	pen.new_image( pic_x + 12 + dist, pic_y, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
 	new_button( pic_x + 11, pic_y, pic_z, pen.FILE_PIC_NIL, {
-		s_x = dist/2 + 1, s_y = 5, no_anim = true, tip = { "Genre", genre }})
+		s_x = dist/2 + 1, s_y = 5, no_anim = true, tip = { GameTextGet( "$mrshll_genre" ), genre }})
 	pen.new_text( pic_x + 13, pic_y, pic_z - 0.01, text, { color = pen.PALETTE.HRMS.RED_3 })
 
 	local tm, true_tm = "00:00", 0
@@ -337,12 +388,12 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	pen.new_image( pic_x + 39, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
 	new_button( pic_x + 11, pic_y + 11, pic_z, pen.FILE_PIC_NIL, {
 		s_x = 29/2, s_y = 5, no_anim = true,
-		tip = { "Time", true_tm > 0 and string.format( "%.1f", 100*math.min( true_tm/duration, 1 )).."%" or "" }})
+		tip = { GameTextGet( "$mrshll_time" ), true_tm > 0 and string.format( "%.1f", 100*math.min( true_tm/duration, 1 )).."%" or "" }})
 	pen.new_text( pic_x + 13, pic_y + 11, pic_z - 0.01, tm, { color = pen.PALETTE.HRMS.RED_3 })
 
 	clicked = new_button( pic_x + 11, pic_y + 22, pic_z,
 		"mods/mrshll_core/mrshll/"..( is_listing and "close" or "playlist" )..".png", {
-		auid = "mrshll_list", tip = is_listing and "Close" or "Playlist Editor" })
+		auid = "mrshll_list", tip = GameTextGet( is_listing and "$mrshll_close" or "$mrshll_playlist" )})
 	if( clicked ) then
 		play_sound( "ass/special_button" )
 		is_listing, is_showing = not( is_listing ), false
@@ -359,24 +410,25 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			local height, accum = 0, 0
 			pen.t.loop( is_showing and this_ignored or this_ordered, function( i, v )
 				cnt = cnt + 1
+				local pos_y = 1 + scroll_pos + 11*(( is_showing and cnt or i ) - ( 1 + accum ))
+				if( pos_y < -10 or pos_y > 130 ) then height = height + 11; return end
 
 				local cat, song = "", ""
 				if( is_showing ) then
 					cat, song = unpack( pen.t.loop( mrshll, function( cat,v )
-						local temp = pen.t.get( v, i )
+						local temp = pen.t.get( v, i, nil, nil, {})
 						return pen.vld( temp ) and { cat, temp } or nil
 					end))
 				else cat = v[1]; song = pen.t.get( mrshll[ cat ], v[2]) end
-
-				local iter = ( is_showing and cnt or i ) - ( 1 + accum )
+				
 				if(( filter_list[ filtering ] or cat ) ~= cat ) then
 					accum = accum + 1; return end
-				local drift = scroll_pos - 2*( 1 - pen.animate( 1, "button_"..song.id, {
+				local drift = -2*( 1 - pen.animate( 1, "button_"..song.id, {
 					ease_out = { "exp", "wav1" }, frames = 10, stillborn = true }))
 				
-				_,r_clicked = new_button( 86, 1 + drift + 11*iter, pic_z - 0.03,
+				_,r_clicked = new_button( 86, pos_y + drift, pic_z - 0.03,
 					"mods/mrshll_core/mrshll/playlist_toggle_"..( is_showing and "B" or "A" )..".png", {
-					auid = "mrshll_exclude_"..song.id, tip = is_showing and { "Include", "RMB to add" } or { "Exclude", "RMB to remove" }})
+					auid = "mrshll_exclude_"..song.id, tip = { GameTextGet( is_showing and "$mrshll_toggle_aa" or "$mrshll_toggle_ba" ), GameTextGet( is_showing and "$mrshll_toggle_ab" or "$mrshll_toggle_bb" )}})
 				if( r_clicked ) then
 					play_sound( "ass/special_button" )
 					if( is_showing ) then
@@ -391,12 +443,12 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 					reset()
 				end
 				
-				pen.new_text( 3, 1 + drift + 11*iter, pic_z - 0.02, song.name, { aggressive = true, dims = {88,0},
+				pen.new_text( 3, pos_y + drift, pic_z - 0.02, song.name, { aggressive = true, dims = {88,0},
 					color = pen.PALETTE.HRMS[ is_showing and "GREY_2" or ( last_played == i and "GOLD_3" or "RED_3" )]})
 				
-				clicked, r_clicked = new_button( 1, 1 + drift + 11*iter, pic_z - 0.01,
+				clicked, r_clicked = new_button( 1, pos_y + drift, pic_z - 0.01,
 					"mods/mrshll_core/mrshll/playlist_line.png", { auid = "mrshll_song_"..song.id,
-					tip = { song.artist.." - "..song.name, is_showing and "" or "LMB to force play, RMB to move up" }})
+					tip = { song.artist.." - "..song.name, is_showing and "" or GameTextGet( "$mrshll_line" )}})
 				if( not( is_showing )) then
 					if( clicked ) then
 						play_sound( "ass/generic_button" )
@@ -413,7 +465,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 						reset()
 					end
 				end
-
+				
 				height = height + 11
 			end)
 
@@ -430,7 +482,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 		clicked = new_button( pic_x + 97, pic_y + 22, pic_z,
 			"mods/mrshll_core/mrshll/"..( is_showing and "back" or "excluded" )..".png", {
-			auid = "mrshll_excluded", tip = is_showing and "Back to Playlist" or "Excluded Tracks" })
+			auid = "mrshll_excluded", tip = GameTextGet( is_showing and "$mrshll_back" or "$mrshll_goners" )})
 		if( clicked ) then
 			play_sound( "ass/special_button" )
 			is_showing = not( is_showing )
@@ -438,15 +490,15 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 		shuffle = new_button( pic_x + 86, pic_y + 11, pic_z,
 			"mods/mrshll_core/mrshll/playlist_order_"..( is_shuffled and "B" or "A" )..".png", {
-			auid = "mrshll_order", tip = { "Shuffle Toggle", ( is_shuffled and "Randomised Selection" or "Ordered Playback" )}})
+			auid = "mrshll_order", tip = { GameTextGet( "$mrshll_shuffle" ), ( GameTextGet( is_shuffled and "$mrshll_shuffle_ba" or "$mrshll_shuffle_bb" ))}})
 		playlist_next, playlist_last = new_button( pic_x, pic_y + 134 + anim, pic_z,
 			"mods/mrshll_core/mrshll/playlist_num.png", {
-			auid = "mrshll_playlist", tip = "Switch Playlist" })
+			auid = "mrshll_playlist", tip = GameTextGet( "$mrshll_switch" )})
 		pen.new_text( pic_x + 2, pic_y + 134 + anim, pic_z - 0.01, string.char( playlist_num + 64 ), { color = pen.PALETTE.HRMS.RED_3 })
 		
 		_,r_clicked = new_button( pic_x + 97, pic_y + 11, pic_z,
 			"mods/mrshll_core/mrshll/reset.png", {
-			auid = "mrshll_reset", tip = { "Return to Default", "RMB to reset the playlist" }})
+			auid = "mrshll_reset", tip = { GameTextGet( "$mrshll_default_a" ), GameTextGet( "$mrshll_default_b" )}})
 		if( r_clicked ) then
 			play_sound( "ass/special_button" )
 			ordered[ playlist_num ] = nil
@@ -457,10 +509,10 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		end
 
 		pen.new_text( pic_x + 59.5, pic_y + 22, pic_z,
-			string.upper( filter_list[ filtering ] or ( is_showing and "Excluded" or "Playlist" )), {
+			string.upper( filter_list[ filtering ] or ( GameTextGet( is_showing and "$mrshll_title_b" or "$mrshll_title_a" ))), {
 			dims = {74,0}, aggressive = true, is_centered_x = true, color = pen.PALETTE.HRMS[ filtering == 0 and "RED_3" or "GOLD_3" ]})
 		clicked, r_clicked = pen.new_interface( pic_x + 22, pic_y + 22, 74, 10, pic_z )
-		new_tooltip( is_showing and "Deleted Items" or { "List Filtering", "the change is purely visual" })
+		new_tooltip( is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )})
 		if( clicked or r_clicked ) then
 			play_sound( "ass/special_button" )
 			if( clicked ) then

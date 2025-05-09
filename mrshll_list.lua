@@ -16,7 +16,7 @@ local MRSHLL_TABLE = {
 
 for c,cat in pairs( MRSHLL_TABLE ) do
 	for i,song in ipairs( cat ) do
-		MRSHLL_TABLE[ c ][ i ].id = "id"..pen.hash_me( song.artist.." - "..song.name )
+		MRSHLL_TABLE[ c ][ i ].id = pen.key_me( song.artist.." - "..song.name )
 	end
 end
 

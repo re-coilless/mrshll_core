@@ -1,5 +1,20 @@
 ModRegisterAudioEventMappings( "mods/mrshll_core/GUIDs.txt" )
 
+--the tutorial (real)
+--1. get all the songs you want on .ogg format (this allows for best quality at least size)
+--2. rename all the tracks to a uniform standard (so, for Phantom Pack, I had filenames like "phantom05.ogg")
+--3. separate every single track into their left and right channels (filename should be "phantom05_l.ogg" and "phantom05_r.ogg")
+--4. download FMOD 2.01.05
+--[WIP] 5. download the starting project (it contains templates for both the extension mod and fmod project)
+--6. make sure to copy the event so guids get generated
+--7. add compression to tracks
+--8. make sure to leave plenty of empty space in the loop, as a safety measure
+--9. add distance condition
+--10. it is highly recommended to balance all the music audio by manually comparing their levels and adjusting the gains accordingly
+--11. setup the table (names + events + duration in seconds *60 to convert to frames)
+--12. export fmod bank and guids
+--13. upload to workshop
+
 if( ModIsEnabled( "mnee" )) then
 	ModLuaFileAppend( "mods/mnee/bindings.lua", "mods/mrshll_core/mnee.lua" )
 end
@@ -7,6 +22,7 @@ end
 function OnModInit()
 	if( not( ModIsEnabled( "mnee" ))) then return end
 	dofile_once( "mods/mnee/lib.lua" )
+	pen.add_translations( "mods/mrshll_core/mrshll/translations.csv" )
 	if( pen.vld( pen.setting_get( "mrshll_core.PLAYLIST" ))) then
 		GamePrint( "MRSHLL PURGE SUCCESSFUL" )
 		ModSettingRemove( "mrshll_core.PLAYLIST" )    
