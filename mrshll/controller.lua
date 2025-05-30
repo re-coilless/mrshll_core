@@ -8,13 +8,14 @@ function new_tooltip( text, data )
 	data = data or {}
 	data.frames = data.frames or 15
 	data.text_prefunc = function( text, data )
-		local extra_dim = 0
 		text = pen.get_hybrid_table( text )
+		
+		local extra = 0
 		if( pen.vld( text[2])) then
-			extra_dim = 2
+			extra = 2
 			text[1] = "{>underscore>{{-}|HRMS|GOLD_3|FORCED|{-}"..text[1].."}<underscore<}"
 			text[1] = text[1].."\n{>indent>{{>color>{{-}|HRMS|GREY_2|{-}"..string.lower( text[2]).."}<color<}}<indent<}" end
-		return text[1], extra_dim, 0
+		return text[1], extra, 0
 	end
 	
 	return pen.new_tooltip( text, data, function( text, d )
@@ -103,7 +104,7 @@ function new_button( pic_x, pic_y, pic_z, pic, data )
 	return pen.new_button( pic_x, pic_y, pic_z, pic, data )
 end
 
-local entity_id = GetUpdatedEntityID()
+local entity_id = index_mrshll_id or GetUpdatedEntityID()
 local hooman = EntityGetRootEntity( entity_id )
 local x, y = EntityGetTransform( hooman )
 
@@ -316,20 +317,22 @@ local playlist_last = false
 local storage_open = pen.magic_storage( entity_id, "is_open" )
 if( pen.vld( storage_open, true ) and not( pen.is_inv_active( hooman ))) then
 	is_going = ComponentGetValue2( storage_open, "value_bool" )
-
-	clicked = new_button( 6, 6, pen.LAYERS.FOREGROUND,
-		"mods/mrshll_core/mrshll/item.png", {
-		auid = "mrshll_main", 
-		is_centered = true, no_anim = true,
-		hov_event = function( pic_x, pic_y, pic_z, pic, d )
-			d.angle = math.rad( 15 )
-			new_tooltip( "Toggle Marshall GUI", { is_active = true })
-			return pic_x, pic_y, pic_z, pic, d
-		end,
-	})
-	if( clicked ) then
-		play_sound( "ass/special_button" )
-		ComponentSetValue2( storage_open, "value_bool", not( is_going ))
+	
+	if( not( ModIsEnabled( "index_core" ))) then  
+		clicked = new_button( 6, 6, pen.LAYERS.FOREGROUND,
+			"mods/mrshll_core/mrshll/item.png", {
+			auid = "mrshll_main", 
+			is_centered = true, no_anim = true,
+			hov_event = function( pic_x, pic_y, pic_z, pic, d )
+				d.angle = math.rad( 15 )
+				new_tooltip( "Toggle Marshall GUI", { is_active = true })
+				return pic_x, pic_y, pic_z, pic, d
+			end,
+		})
+		if( clicked ) then
+			play_sound( "ass/special_button" )
+			ComponentSetValue2( storage_open, "value_bool", not( is_going ))
+		end
 	end
 end
 if( is_going and not( pen.is_inv_active( hooman ))) then
@@ -410,37 +413,39 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			local height, accum = 0, 0
 			pen.t.loop( is_showing and this_ignored or this_ordered, function( i, v )
 				cnt = cnt + 1
-				local pos_y = 1 + scroll_pos + 11*(( is_showing and cnt or i ) - ( 1 + accum ))
-				if( pos_y < -10 or pos_y > 130 ) then height = height + 11; return end
-
 				local cat, song = "", ""
 				if( is_showing ) then
-					cat, song = unpack( pen.t.loop( mrshll, function( cat,v )
-						local temp = pen.t.get( v, i, nil, nil, {})
-						return pen.vld( temp ) and { cat, temp } or nil
-					end))
+					cat, song = pen.cache({ "mrshll_deleted", i }, function()
+						return unpack( pen.t.loop( mrshll, function( cat,v )
+							local temp = pen.t.get( v, i, nil, nil, {})
+							return pen.vld( temp ) and { cat, temp } or nil
+						end))
+					end)
 				else cat = v[1]; song = pen.t.get( mrshll[ cat ], v[2]) end
 				
-				if(( filter_list[ filtering ] or cat ) ~= cat ) then
-					accum = accum + 1; return end
+				if(( filter_list[ filtering ] or cat ) ~= cat ) then accum = accum + 1; return end
+				local pos_y = 1 + scroll_pos + 11*(( is_showing and cnt or i ) - ( 1 + accum ))
+				if( pos_y < -10 or pos_y > 130 ) then height = height + 11; return end 
 				local drift = -2*( 1 - pen.animate( 1, "button_"..song.id, {
 					ease_out = { "exp", "wav1" }, frames = 10, stillborn = true }))
 				
-				_,r_clicked = new_button( 86, pos_y + drift, pic_z - 0.03,
-					"mods/mrshll_core/mrshll/playlist_toggle_"..( is_showing and "B" or "A" )..".png", {
-					auid = "mrshll_exclude_"..song.id, tip = { GameTextGet( is_showing and "$mrshll_toggle_aa" or "$mrshll_toggle_ba" ), GameTextGet( is_showing and "$mrshll_toggle_ab" or "$mrshll_toggle_bb" )}})
-				if( r_clicked ) then
-					play_sound( "ass/special_button" )
-					if( is_showing ) then
-						this_ignored[ song.id ] = nil
-						table.insert( this_ordered, { cat, song.id })
-						ordered[ playlist_num ] = this_ordered
-						pen.setting_set( "mrshll_core.ORDER_LIST", pen.t.parse( ordered ))
-					else this_ignored[ song.id ] = 1 end
-					ignored[ playlist_num ] = this_ignored
-					pen.setting_set( "mrshll_core.IGNORE_LIST", pen.t.parse( ignored ))
-					playlist_update = not( is_showing )
-					reset()
+				if( is_showing or #this_ordered > 1 ) then
+					_,r_clicked = new_button( 86, pos_y + drift, pic_z - 0.03,
+						"mods/mrshll_core/mrshll/playlist_toggle_"..( is_showing and "B" or "A" )..".png", {
+						auid = "mrshll_exclude_"..song.id, tip = { GameTextGet( is_showing and "$mrshll_toggle_aa" or "$mrshll_toggle_ba" ), GameTextGet( is_showing and "$mrshll_toggle_ab" or "$mrshll_toggle_bb" )}})
+					if( r_clicked ) then
+						play_sound( "ass/special_button" )
+						if( is_showing ) then
+							this_ignored[ song.id ] = nil
+							table.insert( this_ordered, { cat, song.id })
+							ordered[ playlist_num ] = this_ordered
+							pen.setting_set( "mrshll_core.ORDER_LIST", pen.t.parse( ordered ))
+						else this_ignored[ song.id ] = 1 end
+						ignored[ playlist_num ] = this_ignored
+						pen.setting_set( "mrshll_core.IGNORE_LIST", pen.t.parse( ignored ))
+						playlist_update = not( is_showing )
+						reset()
+					end
 				end
 				
 				pen.new_text( 3, pos_y + drift, pic_z - 0.02, song.name, { aggressive = true, dims = {88,0},

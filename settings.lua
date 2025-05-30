@@ -53,7 +53,7 @@ mod_settings =
 		ui_name = "Hide the Dragged",
 		ui_description = "Removes the button that allows one to reposition the UI.",
 		hidden = false,
-		value_default = false,
+		value_default = true,
 		scope = MOD_SETTING_SCOPE_RUNTIME,
 	},
 	{
@@ -85,7 +85,7 @@ mod_settings =
 		ui_name = "Position",
 		ui_description = "",
 		hidden = true,
-		value_default = "|183|22|",
+		value_default = "|5|42|",
 		text_max_length = 100000,
 		scope = MOD_SETTING_SCOPE_RUNTIME,
 	},
