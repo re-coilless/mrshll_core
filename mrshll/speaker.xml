@@ -1,8 +1,0 @@
-<Entity >
-	<AudioLoopComponent
-		_tags="enabled_in_world,enabled_in_hand,enabled_in_inventory,sound"
-		file="mods/mrshll_core/mrshll.bank"
-		event_name="default_l"
-		volume_autofade_speed="0.25"
-	></AudioLoopComponent>
-</Entity>
