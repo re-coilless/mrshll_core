@@ -1,0 +1,4 @@
+A universal stereo sound control system, intended as a reliable custom music solution.
+Can also function in a standalone mode as a fully-fledged audio player with a playlist capability. By default comes with a single composition (Julius Fuсik - Entry of the Gladiators) to keep the weight down but one can browse the list of content packs [here](https://steamcommunity.com/sharedfiles/filedetails/?id=3479523995) (the packs are too large for GitHub).
+
+Note: this is a proper in-world item and not a background music replacement - for it to not interfere with the normally present background soundtrack you are expected to manually set the vanilla music volume to 0. This mod requires [M-Nee](https://github.com/re-coilless/mnee) to function, as it uses its internal libraries for own features.
