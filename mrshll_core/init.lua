@@ -89,7 +89,12 @@ function OnPlayerSpawned( hooman )
 		{
 			_tags = "enabled_in_world",
 		}), false )
-		ComponentSetValue2( EntityAddComponent( controller, "ItemComponent",
+		ComponentObjectSetValue2( EntityAddComponent( controller, "AbilityComponent",
+		{
+			throw_as_item = "0",
+		}), "gun_config", "deck_capacity", 0 )
+		
+		local item = EntityAddComponent( controller, "ItemComponent",
 		{
 			_tags = "enabled_in_world",
 			item_name = "HermeS Marshall©",
@@ -100,12 +105,9 @@ function OnPlayerSpawned( hooman )
 			ui_sprite = "mods/mrshll_core/mrshll/anim/1.png",
 			ui_description = "Manufactured by Hermeneutics Superior FRC.\nIt shimmers with tunes.",
 			play_spinning_animation = "0",
-		}), "preferred_inventory", "QUICK" )
-		ComponentObjectSetValue2( EntityAddComponent( controller, "AbilityComponent",
-		{
-			throw_as_item = "0",
-		}), "gun_config", "deck_capacity", 0 )
-		
+		})
+		ComponentSetValue2( item, "preferred_inventory", "QUICK" )
+
 		local steam = EntityAddComponent( controller, "SpriteParticleEmitterComponent", 
 		{
 			_tags = "enabled_in_world",
@@ -148,8 +150,7 @@ function OnPlayerSpawned( hooman )
 			GamePickUpInventoryItem( hooman, controller, false )
 		end
 	else
-		EntityAddComponent( controller, "VariableStorageComponent",
-		{
+		EntityAddComponent( controller, "VariableStorageComponent", {
 			name = "is_open",
 			value_bool = "0",
 		})

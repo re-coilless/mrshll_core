@@ -126,7 +126,7 @@ local this_ordered = pen.t.clone( ordered[ playlist_num ])
 local ignored = pen.t.clone( pen.t.parse( pen.setting_get( "mrshll_core.IGNORE_LIST" )))
 local this_ignored = pen.t.clone( ignored[ playlist_num ])
 
-pen.t.loop({"left","right"}, function( i, v )
+pen.t.loop({ "left", "right" }, function( i, v )
 	local speaker = pen.get_child( entity_id, v )
 	if( not( pen.vld( speaker, true ))) then return end
 	
@@ -148,6 +148,11 @@ mrshll.gonna_play = mrshll.gonna_play or ( is_playing == 0 and mrshll.last_playe
 mrshll.num_override, mrshll.last_played = mrshll.num_override or 0, mrshll.last_played or 0
 mrshll.switch_delay = mrshll.switch_delay or ( mrshll.gonna_play and delay or 0 )
 mrshll.list = dofile( "mods/mrshll_core/mrshll_list.lua" )
+if( not( pen.vld( mrshll.filter_list ))) then
+	mrshll.filter_list = {}
+	for cat,_ in pen.t.order( mrshll.list ) do table.insert( mrshll.filter_list, cat ) end
+end
+
 
 local function reset()
 	ComponentSetValue2( storage_delay, "value_float", 0 )
@@ -238,7 +243,7 @@ if( pen.vld( goners_ignore )) then
 end
 
 if( mrshll.gonna_play ) then
-	pen.t.loop({"left","right"}, function( i, v )
+	pen.t.loop({ "left", "right" }, function( i, v )
 		local speaker = pen.get_child( entity_id, v )
 		if( pen.vld( speaker, true )) then return end
 		speaker = EntityLoad( "mods/mrshll_core/mrshll/speaker.xml", x, y )
@@ -262,15 +267,20 @@ if( mrshll.gonna_play ) then
 			local played_list = pen.t.unarray( pen.t.pack( ComponentGetValue2( storage_played, "value_string" )))
 			pen.hallway( function()
 				if( force_the_same ) then return end
-				if( not( is_shuffled )) then return end
-				if( played_list[ this_ordered[ num ][2]] == nil ) then return end
+
+				local is_new = played_list[ this_ordered[ num ][2]] == nil
+				local is_cat = mrshll.filtering == 0 or this_ordered[ num ][1] == mrshll.filter_list[ mrshll.filtering ]
+				if( is_new and is_cat ) then return end
 				
 				local is_done = true
 				for i,v in ipairs( this_ordered ) do
-					if( played_list[ v[2]] == nil ) then is_done, num = false, i; break end
+					is_new = played_list[ v[2]] == nil
+					is_cat = mrshll.filtering == 0 or v[1] == mrshll.filter_list[ mrshll.filtering ]
+					if( is_new and is_cat ) then is_done, num = false, i; break end
 				end
 
 				if( is_done ) then played_list = {} else return end
+				if( mrshll.filtering > 0 ) then num = mrshll.last_played; return end
 				if( mrshll.last_played == num ) then num = num < 2 and #this_ordered or mrshll.last_played - 1 end
 			end)
 			force_the_same, mrshll.last_played, played_list[ this_ordered[ num ][2]] = false, num, 1
@@ -318,6 +328,7 @@ local volume_down = false
 local playlist_next = false
 local playlist_last = false
 
+local scroller_id = "_"
 local storage_open = pen.magic_storage( entity_id, "is_open" )
 if( pen.vld( storage_open, true ) and not( pen.is_inv_active( hooman ))) then
 	is_going = ComponentGetValue2( storage_open, "value_bool" )
@@ -407,11 +418,9 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		if( mrshll.is_listing ) then pen.atimer( "main_window", nil, true ) end
 	end
 	if( mrshll.is_listing ) then
-		local filter_list = {}
-		for cat,_ in pen.t.order( mrshll.list ) do table.insert( filter_list, cat ) end
+		scroller_id = ( mrshll.is_showing and "excluded_" or "playlist_" )..playlist_num
 
 		local cnt = 0
-		local scroller_id = ( mrshll.is_showing and "excluded_" or "playlist_" )..playlist_num
 		local anim = -10*( 1 - pen.animate( 1, "main_window", { ease_out = { "exp", "wav1" }, frames = 15, stillborn = true }))
 		pen.catch( pen.new_scroller, { scroller_id, pic_x + 12, pic_y + 32, pic_z + 0.01, 95, 111 + anim, function( scroll_pos )
 			local height, accum = 0, 0
@@ -427,7 +436,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 					end)
 				else cat = v[1]; song = pen.t.get( mrshll.list[ cat ], v[2]) end
 				
-				if(( filter_list[ mrshll.filtering ] or cat ) ~= cat ) then accum = accum + 1; return end
+				if(( mrshll.filter_list[ mrshll.filtering ] or cat ) ~= cat ) then accum = accum + 1; return end
 				local pos_y = 1 + scroll_pos + 11*(( mrshll.is_showing and cnt or i ) - ( 1 + accum ))
 				if( pos_y < -10 or pos_y > 130 ) then height = height + 11; return end 
 				local drift = -2*( 1 - pen.animate( 1, "button_"..song.id, {
@@ -494,6 +503,9 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			"mods/mrshll_core/mrshll/"..( mrshll.is_showing and "back" or "excluded" )..".png", {
 			auid = "mrshll_excluded", tip = GameTextGet( mrshll.is_showing and "$mrshll_back" or "$mrshll_goners" )})
 		if( clicked ) then
+			( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
+			(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+
 			mrshll.play_sound( "ass/special_button" )
 			mrshll.is_showing = not( mrshll.is_showing )
 		end
@@ -510,6 +522,9 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			"mods/mrshll_core/mrshll/reset.png", {
 			auid = "mrshll_reset", tip = { GameTextGet( "$mrshll_default_a" ), GameTextGet( "$mrshll_default_b" )}})
 		if( r_clicked ) then
+			( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
+			(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+
 			mrshll.play_sound( "ass/special_button" )
 			ordered[ playlist_num ] = nil
 			pen.setting_set( "mrshll_core.ORDER_LIST", pen.t.parse( ordered ))
@@ -519,15 +534,18 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		end
 
 		pen.new_text( pic_x + 59.5, pic_y + 22, pic_z,
-			string.upper( filter_list[ mrshll.filtering ] or ( GameTextGet( mrshll.is_showing and "$mrshll_title_b" or "$mrshll_title_a" ))), {
+			string.upper( mrshll.filter_list[ mrshll.filtering ] or ( GameTextGet( mrshll.is_showing and "$mrshll_title_b" or "$mrshll_title_a" ))), {
 			dims = {74,0}, aggressive = true, is_centered_x = true, color = pen.PALETTE.HRMS[ mrshll.filtering == 0 and "RED_3" or "GOLD_3" ]})
 		clicked, r_clicked = pen.new_interface( pic_x + 22, pic_y + 22, 74, 10, pic_z )
 		mrshll.new_tooltip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )})
 		if( clicked or r_clicked ) then
-			mrshll.play_sound( "ass/special_button" )
+			( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
+			(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+
 			if( clicked ) then
-				mrshll.filtering = mrshll.filtering > #filter_list - 1 and 0 or mrshll.filtering + 1
-			else mrshll.filtering = mrshll.filtering < 1 and #filter_list or mrshll.filtering - 1 end
+				mrshll.filtering = mrshll.filtering > #mrshll.filter_list - 1 and 0 or mrshll.filtering + 1
+			else mrshll.filtering = mrshll.filtering < 1 and #mrshll.filter_list or mrshll.filtering - 1 end
+			mrshll.play_sound( "ass/special_button" )
 		end
 
 		pen.new_image( pic_x + 11, pic_y + 22, pic_z + 0.01, "mods/mrshll_core/mrshll/window_playlist.png", { can_click = true })
@@ -568,6 +586,9 @@ end
 playlist_next = playlist_next or mnee.mnin( "bind", { "mrshll_core", "playlist_next" }, { pressed = true, dirty = true })
 playlist_last = playlist_last or mnee.mnin( "bind", { "mrshll_core", "playlist_last" }, { pressed = true, dirty = true })
 if( playlist_next or playlist_last ) then
+	( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
+	(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+
 	mrshll.play_sound( "ass/special_button" )
 	if( playlist_next ) then
 		playlist_num = playlist_num > 25 and 1 or playlist_num + 1
