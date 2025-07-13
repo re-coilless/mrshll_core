@@ -503,8 +503,8 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			"mods/mrshll_core/mrshll/"..( mrshll.is_showing and "back" or "excluded" )..".png", {
 			auid = "mrshll_excluded", tip = GameTextGet( mrshll.is_showing and "$mrshll_back" or "$mrshll_goners" )})
 		if( clicked ) then
-			( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
-			(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+			pen.c.estimator_memo[ scroller_id.."_anim" ] = 0
+			pen.c.scroll_memo[ scroller_id ].p = 0
 
 			mrshll.play_sound( "ass/special_button" )
 			mrshll.is_showing = not( mrshll.is_showing )
