@@ -39,20 +39,20 @@ _BINDINGS[ "mrshll_core" ] = {
 		
 		keys = {["keypad_*"]=1},
 	},
-    ["playlist_next"] = {
-		order_id = "f",
+    -- ["playlist_next"] = {
+	-- 	order_id = "f",
 		
-		name = "$mrshll_mnee_playlist_a",
-		desc = "$mrshll_mnee_playlist_a_",
+	-- 	name = "$mrshll_mnee_playlist_a",
+	-- 	desc = "$mrshll_mnee_playlist_a_",
 		
-		keys = {["keypad_2"]=1},
-	},
-    ["playlist_last"] = {
-		order_id = "g",
+	-- 	keys = {["keypad_2"]=1},
+	-- },
+    -- ["playlist_last"] = {
+	-- 	order_id = "g",
 		
-		name = "$mrshll_mnee_playlist_b",
-		desc = "$mrshll_mnee_playlist_b_",
+	-- 	name = "$mrshll_mnee_playlist_b",
+	-- 	desc = "$mrshll_mnee_playlist_b_",
 		
-		keys = {["keypad_1"]=1},
-	},
+	-- 	keys = {["keypad_1"]=1},
+	-- },
 }
