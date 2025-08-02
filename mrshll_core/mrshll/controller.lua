@@ -422,7 +422,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 		local cnt = 0
 		local anim = -10*( 1 - pen.animate( 1, "main_window", { ease_out = { "exp", "wav1" }, frames = 15, stillborn = true }))
-		pen.catch( pen.new_scroller, { scroller_id, pic_x + 12, pic_y + 32, pic_z + 0.01, 95, 111 + anim, function( scroll_pos )
+		pen.try( pen.new_scroller, { scroller_id, pic_x + 12, pic_y + 32, pic_z + 0.01, 95, 111 + anim, function( scroll_pos )
 			local height, accum = 0, 0
 			pen.t.loop( mrshll.is_showing and this_ignored or this_ordered, function( i, v )
 				cnt = cnt + 1
