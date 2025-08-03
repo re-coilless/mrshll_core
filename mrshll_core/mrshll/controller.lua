@@ -555,21 +555,21 @@ end
 
 pen.gui_builder( true )
 
-if( play or mnee.mnin( "bind", { "mrshll_core", "play" }, { pressed = true, dirty = true })) then
+if( play or mnee.mnin( "bind", { "mrshll_core", "play" }, { pressed = true })) then
 	mrshll.play_sound( "ass/generic_button" )
 	mrshll.gonna_play = not( mrshll.gonna_play )
 	mrshll.switch_delay = mrshll.gonna_play and 0 or delay
 	force_the_same, mrshll.num_override = true, mrshll.last_played
 end
 
-if( forward or mnee.mnin( "bind", { "mrshll_core", "next" }, { pressed = true, dirty = true })) then
+if( forward or mnee.mnin( "bind", { "mrshll_core", "next" }, { pressed = true })) then
 	mrshll.play_sound( "ass/generic_button" )
 	mrshll.switch_delay, mrshll.gonna_play = delay, true
 	ComponentSetValue2( storage_delay, "value_float", 0 )
 end
 
-volume_up = volume_up or mnee.mnin( "bind", { "mrshll_core", "volume_up" }, { pressed = true, dirty = true })
-volume_down = volume_down or mnee.mnin( "bind", { "mrshll_core", "volume_down" }, { pressed = true, dirty = true })
+volume_up = volume_up or mnee.mnin( "bind", { "mrshll_core", "volume_up" }, { pressed = true })
+volume_down = volume_down or mnee.mnin( "bind", { "mrshll_core", "volume_down" }, { pressed = true })
 if( volume_up or volume_down ) then
 	mrshll.play_sound( "ass/generic_button" )
 	local v = math.min( math.max( volume + 0.1*( volume_up and 1 or -1 ), 0.3 ), 5 )
@@ -577,14 +577,12 @@ if( volume_up or volume_down ) then
 	ComponentSetValue2( storage_sound, "value_float", current_volume + ( v - volume ))
 end
 
-if( shuffle or mnee.mnin( "bind", { "mrshll_core", "shuffle" }, { pressed = true, dirty = true })) then
+if( shuffle or mnee.mnin( "bind", { "mrshll_core", "shuffle" }, { pressed = true })) then
 	mrshll.play_sound( "ass/generic_button" )
 	pen.setting_set( "mrshll_core.IS_SHUFFLED", not( is_shuffled ))
 	reset()
 end
 
-playlist_next = playlist_next or mnee.mnin( "bind", { "mrshll_core", "playlist_next" }, { pressed = true, dirty = true })
-playlist_last = playlist_last or mnee.mnin( "bind", { "mrshll_core", "playlist_last" }, { pressed = true, dirty = true })
 if( playlist_next or playlist_last ) then
 	( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
 	(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
