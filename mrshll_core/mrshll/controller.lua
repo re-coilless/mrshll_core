@@ -522,8 +522,8 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			"mods/mrshll_core/mrshll/reset.png", {
 			auid = "mrshll_reset", tip = { GameTextGet( "$mrshll_default_a" ), GameTextGet( "$mrshll_default_b" )}})
 		if( r_clicked ) then
-			( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
-			(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+			pen.c.estimator_memo[ scroller_id.."_anim" ] = 0
+			pen.c.scroll_memo[ scroller_id ].p = 0
 
 			mrshll.play_sound( "ass/special_button" )
 			ordered[ playlist_num ] = nil
@@ -539,8 +539,8 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		clicked, r_clicked = pen.new_interface( pic_x + 22, pic_y + 22, 74, 10, pic_z )
 		mrshll.new_tooltip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )})
 		if( clicked or r_clicked ) then
-			( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
-			(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+			pen.c.estimator_memo[ scroller_id.."_anim" ] = 0
+			pen.c.scroll_memo[ scroller_id ].p = 0
 
 			if( clicked ) then
 				mrshll.filtering = mrshll.filtering > #mrshll.filter_list - 1 and 0 or mrshll.filtering + 1
@@ -584,8 +584,8 @@ if( shuffle or mnee.mnin( "bind", { "mrshll_core", "shuffle" }, { pressed = true
 end
 
 if( playlist_next or playlist_last ) then
-	( pen.c.estimator_memo or {})[ scroller_id.."_anim" ] = 0
-	(( pen.c.scroll_memo or {})[ scroller_id ] or {}).p = 0
+	pen.c.estimator_memo[ scroller_id.."_anim" ] = 0
+	pen.c.scroll_memo[ scroller_id ].p = 0
 
 	mrshll.play_sound( "ass/special_button" )
 	if( playlist_next ) then

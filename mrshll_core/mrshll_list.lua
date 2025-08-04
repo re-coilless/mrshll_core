@@ -1,5 +1,7 @@
 local bank_file = "mods/mrshll_core/mrshll.bank"
 
+--use this for automatic processing https://github.com/M0n7y5/FenixProFmod (thanks Lamia)
+
 --the tutorial (real)
 --1. get all the songs you want on .ogg format (this allows for best quality at least size)
 --2. rename all the tracks to a uniform standard (so, for Phantom Pack, I had filenames like "phantom05.ogg")
