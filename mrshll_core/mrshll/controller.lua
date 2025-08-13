@@ -489,9 +489,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			end)
 
 			return { height + 5, 1 }
-		end, { color = {
-			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
-			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
+		end, { bar_colors = {
 			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
 			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
 			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
