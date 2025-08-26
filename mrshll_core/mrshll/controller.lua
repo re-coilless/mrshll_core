@@ -91,11 +91,9 @@ function mrshll.new_button( pic_x, pic_y, pic_z, pic, data )
 	end
 	data.hov_event = data.hov_event or function( pic_x, pic_y, pic_z, pic, d )
 		if( pen.vld( d.tip )) then
-			if( pen.vld( pen.c.cutter_dims )) then
-				pen.uncutter( function( cut_x, cut_y, cut_w, cut_h )
-					return mrshll.new_tooltip( d.tip, { is_active = true })
-				end)
-			else mrshll.new_tooltip( d.tip, { is_active = true }) end
+			pen.uncutter( function( cut_x, cut_y, cut_w, cut_h )
+				return mrshll.new_tooltip( d.tip, { is_active = true })
+			end)
 		end
 		if( pen.vld( d.highlight )) then pen.new_pixel(
 			pic_x - 1, pic_y - 1, pic_z + 0.001, d.highlight,
@@ -354,7 +352,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	if( not( no_dragger )) then
 		if( mrshll.is_moving ) then
 			local new_x, new_y, state, is_hovered = 0, 0, 0, false
-			new_x, new_y, state, _, r_clicked, is_hovered = pen.new_dragger( "mnee_window", pic_x, pic_y - 11, 10, 10 )
+			new_x, new_y, state, _, r_clicked, is_hovered = pen.new_dragger( "mrshll_dragger", pic_x, pic_y - 11, 10, 10 )
 			if( new_x ~= pic_x or new_y + 11 ~= pic_y ) then pen.setting_set( "mrshll_core.UI_POS", pen.t.pack({ new_x, new_y + 11 })) end
 			if( r_clicked ) then mrshll.play_sound( "ass/special_button" ); mrshll.is_moving = not( mrshll.is_moving ) end
 			mrshll.new_tooltip({ GameTextGet( "$mrshll_dragger_aa" ), GameTextGet( "$mrshll_dragger_ab" )}, { is_active = is_hovered and state ~= 2 })
