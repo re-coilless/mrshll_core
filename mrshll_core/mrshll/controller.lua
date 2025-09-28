@@ -92,7 +92,7 @@ function mrshll.new_button( pic_x, pic_y, pic_z, pic, data )
 	data.hov_event = data.hov_event or function( pic_x, pic_y, pic_z, pic, d )
 		if( pen.vld( d.tip )) then
 			pen.uncutter( function( cut_x, cut_y, cut_w, cut_h )
-				return mrshll.new_tooltip( d.tip, { is_active = true })
+				return mrshll.new_tooltip( d.tip, { is_active = true , pic_z = d.tip_z, fid = ( d.jpad or {})[1]})
 			end)
 		end
 		if( pen.vld( d.highlight )) then pen.new_pixel(
@@ -334,11 +334,11 @@ if( pen.vld( storage_open, true ) and not( pen.is_inv_active( hooman ))) then
 	if( not( ModIsEnabled( "index_core" ))) then  
 		clicked = mrshll.new_button( 6, 6, pen.LAYERS.FOREGROUND,
 			"mods/mrshll_core/mrshll/item.png", {
-			auid = "mrshll_main", 
+			auid = "mrshll_main", jpad = true,
 			is_centered = true, no_anim = true,
 			hov_event = function( pic_x, pic_y, pic_z, pic, d )
 				d.angle = math.rad( 15 )
-				mrshll.new_tooltip( "Toggle Marshall GUI", { is_active = true })
+				mrshll.new_tooltip( "Toggle Marshall GUI", { is_active = true, fid = ( d.jpad or {})[1]})
 				return pic_x, pic_y, pic_z, pic, d
 			end,
 		})
@@ -352,14 +352,14 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	if( not( no_dragger )) then
 		if( mrshll.is_moving ) then
 			local new_x, new_y, state, is_hovered = 0, 0, 0, false
-			new_x, new_y, state, _, r_clicked, is_hovered = pen.new_dragger( "mrshll_dragger", pic_x, pic_y - 11, 10, 10 )
+			new_x, new_y, state, _, r_clicked, is_hovered = pen.new_dragger( "mrshll_dragger", pic_x, pic_y - 11, 10, 10, nil, { jpad = true })
 			if( new_x ~= pic_x or new_y + 11 ~= pic_y ) then pen.setting_set( "mrshll_core.UI_POS", pen.t.pack({ new_x, new_y + 11 })) end
 			if( r_clicked ) then mrshll.play_sound( "ass/special_button" ); mrshll.is_moving = not( mrshll.is_moving ) end
-			mrshll.new_tooltip({ GameTextGet( "$mrshll_dragger_aa" ), GameTextGet( "$mrshll_dragger_ab" )}, { is_active = is_hovered and state ~= 2 })
+			mrshll.new_tooltip({ GameTextGet( "$mrshll_dragger_aa" ), GameTextGet( "$mrshll_dragger_ab" )}, { is_active = is_hovered and state ~= 2, fid = "dragger_mrshll_dragger_focus" })
 		end
 
 		_,r_clicked = mrshll.new_button( pic_x, pic_y - 11, pic_z,
-			"mods/mrshll_core/mrshll/move_"..( mrshll.is_moving and "B" or "A" )..".png", {
+			"mods/mrshll_core/mrshll/move_"..( mrshll.is_moving and "B" or "A" )..".png", { jpad = true,
 			auid = "mrshll_move", tip = not( mrshll.is_moving ) and { GameTextGet( "$mrshll_dragger_ba" ), GameTextGet( "$mrshll_dragger_bb" )} or nil })
 		if( r_clicked ) then
 			mrshll.play_sound( "ass/special_button" )
@@ -368,13 +368,13 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	end
 
 	play = mrshll.new_button( pic_x, pic_y, pic_z,
-		"mods/mrshll_core/mrshll/play_"..( mrshll.gonna_play and "B" or "A" )..".png", {
+		"mods/mrshll_core/mrshll/play_"..( mrshll.gonna_play and "B" or "A" )..".png", { jpad_vip = true,
 		auid = "mrshll_play", tip = mrshll.gonna_play and GameTextGet( "$mrshll_stop" ) or GameTextGet( "$mrshll_play" )})
 	forward = mrshll.new_button( pic_x, pic_y + 11, pic_z,
-		"mods/mrshll_core/mrshll/next.png", {
+		"mods/mrshll_core/mrshll/next.png", { jpad = true,
 		auid = "mrshll_next", tip = GameTextGet( "$mrshll_next" )})
 	volume_up, volume_down = mrshll.new_button( pic_x, pic_y + 22, pic_z,
-		"mods/mrshll_core/mrshll/volume_"..( math.floor( 3.8*math.max( 1.5 - volume, 0 )))..".png", {
+		"mods/mrshll_core/mrshll/volume_"..( math.floor( 3.8*math.max( 1.5 - volume, 0 )))..".png", { jpad = true,
 		auid = "mrshll_volume", tip = { GameTextGet( "$mrshll_volume_a" )..math.floor( volume*100 + 0.5 ), GameTextGet( "$mrshll_volume_b" )}})
 	
 	local text, genre, duration = "John Cage - 4'33\"", "Classical", 0
@@ -408,7 +408,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	pen.new_text( pic_x + 13, pic_y + 11, pic_z - 0.01, tm, { color = pen.PALETTE.HRMS.RED_3 })
 
 	clicked = mrshll.new_button( pic_x + 11, pic_y + 22, pic_z,
-		"mods/mrshll_core/mrshll/"..( mrshll.is_listing and "close" or "playlist" )..".png", {
+		"mods/mrshll_core/mrshll/"..( mrshll.is_listing and "close" or "playlist" )..".png", { jpad = true,
 		auid = "mrshll_list", tip = GameTextGet( mrshll.is_listing and "$mrshll_close" or "$mrshll_playlist" )})
 	if( clicked ) then
 		mrshll.play_sound( "ass/special_button" )
@@ -422,6 +422,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		local anim = -10*( 1 - pen.animate( 1, "main_window", { ease_out = { "exp", "wav1" }, frames = 15, stillborn = true }))
 		pen.try( pen.new_scroller, { scroller_id, pic_x + 12, pic_y + 32, pic_z + 0.01, 95, 111 + anim, function( scroll_pos )
 			local height, accum = 0, 0
+			local active_jpads, is_jpad = {}, false
 			pen.t.loop( mrshll.is_showing and this_ignored or this_ordered, function( i, v )
 				cnt = cnt + 1
 				local cat, song = "", ""
@@ -441,9 +442,10 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 					ease_out = { "exp", "wav1" }, frames = 10, stillborn = true }))
 				
 				if( mrshll.is_showing or #this_ordered > 1 ) then
-					_,r_clicked = mrshll.new_button( 86, pos_y + drift, pic_z - 0.03,
+					_,r_clicked,_,is_jpad = mrshll.new_button( 86, pos_y + drift, pic_z - 0.03,
 						"mods/mrshll_core/mrshll/playlist_toggle_"..( mrshll.is_showing and "B" or "A" )..".png", {
-						auid = "mrshll_exclude_"..song.id, tip = { GameTextGet( mrshll.is_showing and "$mrshll_toggle_aa" or "$mrshll_toggle_ba" ), GameTextGet( mrshll.is_showing and "$mrshll_toggle_ab" or "$mrshll_toggle_bb" )}})
+						auid = "mrshll_exclude_"..song.id, tip = { GameTextGet( mrshll.is_showing and "$mrshll_toggle_aa" or "$mrshll_toggle_ba" ), GameTextGet( mrshll.is_showing and "$mrshll_toggle_ab" or "$mrshll_toggle_bb" )}, jpad = true })
+					if( is_jpad ) then active_jpads[ is_jpad ] = true end
 					if( r_clicked ) then
 						mrshll.play_sound( "ass/special_button" )
 						if( mrshll.is_showing ) then
@@ -462,9 +464,10 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 				pen.new_text( 3, pos_y + drift, pic_z - 0.02, song.name, { aggressive = true, dims = {88,0},
 					color = pen.PALETTE.HRMS[ mrshll.is_showing and "GREY_2" or ( mrshll.last_played == i and "GOLD_3" or "RED_3" )]})
 				
-				clicked, r_clicked = mrshll.new_button( 1, pos_y + drift, pic_z - 0.01,
+				clicked, r_clicked, _, is_jpad = mrshll.new_button( 1, pos_y + drift, pic_z - 0.01,
 					"mods/mrshll_core/mrshll/playlist_line.png", { auid = "mrshll_song_"..song.id,
-					tip = { song.artist.." - "..song.name, mrshll.is_showing and "" or GameTextGet( "$mrshll_line" )}})
+					tip = { song.artist.." - "..song.name, mrshll.is_showing and "" or GameTextGet( "$mrshll_line" )}, jpad = true })
+				if( is_jpad ) then active_jpads[ is_jpad ] = true end
 				if( not( mrshll.is_showing )) then
 					if( clicked ) then
 						mrshll.play_sound( "ass/generic_button" )
@@ -486,8 +489,8 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 				height = height + 11
 			end)
 
-			return { height + 5, 1 }
-		end, { bar_colors = {
+			return { height + 5, 1, active_jpads }
+		end, { jpad = true, bar_colors = {
 			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
 			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
 			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
@@ -496,7 +499,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		}}})
 
 		clicked = mrshll.new_button( pic_x + 97, pic_y + 22, pic_z,
-			"mods/mrshll_core/mrshll/"..( mrshll.is_showing and "back" or "excluded" )..".png", {
+			"mods/mrshll_core/mrshll/"..( mrshll.is_showing and "back" or "excluded" )..".png", { jpad = true,
 			auid = "mrshll_excluded", tip = GameTextGet( mrshll.is_showing and "$mrshll_back" or "$mrshll_goners" )})
 		if( clicked ) then
 			pen.c.estimator_memo[ scroller_id.."_anim_y" ] = 0
@@ -508,14 +511,14 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 		shuffle = mrshll.new_button( pic_x + 86, pic_y + 11, pic_z,
 			"mods/mrshll_core/mrshll/playlist_order_"..( is_shuffled and "B" or "A" )..".png", {
-			auid = "mrshll_order", tip = { GameTextGet( "$mrshll_shuffle" ), ( GameTextGet( is_shuffled and "$mrshll_shuffle_ba" or "$mrshll_shuffle_bb" ))}})
+			auid = "mrshll_order", tip = { GameTextGet( "$mrshll_shuffle" ), ( GameTextGet( is_shuffled and "$mrshll_shuffle_ba" or "$mrshll_shuffle_bb" ))}, jpad = true })
 		playlist_next, playlist_last = mrshll.new_button( pic_x, pic_y + 134 + anim, pic_z,
-			"mods/mrshll_core/mrshll/playlist_num.png", {
+			"mods/mrshll_core/mrshll/playlist_num.png", { jpad = true,
 			auid = "mrshll_playlist", tip = GameTextGet( "$mrshll_switch" )})
 		pen.new_text( pic_x + 2, pic_y + 134 + anim, pic_z - 0.01, string.char( playlist_num + 64 ), { color = pen.PALETTE.HRMS.RED_3 })
 		
 		_,r_clicked = mrshll.new_button( pic_x + 97, pic_y + 11, pic_z,
-			"mods/mrshll_core/mrshll/reset.png", {
+			"mods/mrshll_core/mrshll/reset.png", { jpad = true,
 			auid = "mrshll_reset", tip = { GameTextGet( "$mrshll_default_a" ), GameTextGet( "$mrshll_default_b" )}})
 		if( r_clicked ) then
 			pen.c.estimator_memo[ scroller_id.."_anim_y" ] = 0
@@ -532,8 +535,8 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		pen.new_text( pic_x + 59.5, pic_y + 22, pic_z,
 			string.upper( mrshll.filter_list[ mrshll.filtering ] or ( GameTextGet( mrshll.is_showing and "$mrshll_title_b" or "$mrshll_title_a" ))), {
 			dims = {74,0}, aggressive = true, is_centered_x = true, color = pen.PALETTE.HRMS[ mrshll.filtering == 0 and "RED_3" or "GOLD_3" ]})
-		clicked, r_clicked = pen.new_interface( pic_x + 22, pic_y + 22, 74, 10, pic_z )
-		mrshll.new_tooltip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )})
+		clicked, r_clicked = pen.new_interface( pic_x + 22, pic_y + 22, 74, 10, pic_z, { jpad = { "mrshll_title", false, true }})
+		mrshll.new_tooltip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )}, { fid = "mrshll_title" })
 		if( clicked or r_clicked ) then
 			pen.c.estimator_memo[ scroller_id.."_anim_y" ] = 0
 			pen.c.scroll_memo[ scroller_id ].py = 0
