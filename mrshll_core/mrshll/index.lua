@@ -1,3 +1,6 @@
+local GLOBAL_MODES, GLOBAL_MUTATORS, APPLETS, BOSS_BARS,
+	WAND_STATS, SPELL_STATS, MATTER_DESCS, ITEM_CATS, GUI_STRUCT = unpack( index.STRUCT )
+
 if( ModSettingGetNextValue( "mrshll_core.ITEM_INIT" ) == 3 ) then
 	table.insert( APPLETS.l, {
 		name = "HermeS Marshall", desc = "Toggle record player GUI.",

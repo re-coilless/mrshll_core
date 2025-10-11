@@ -21,7 +21,7 @@ function OnModInit()
 	end
 	
 	if( not( ModIsEnabled( "index_core" ))) then return end
-	pen.magic_append( "mods/index_core/files/_structure.lua", "mods/mrshll_core/mrshll/index.lua" )
+	pen.magic_append( "mods/index_core/files/_structure.lua", "mods/mrshll_core/mrshll/index.lua", true )
 end
 
 function OnWorldPreUpdate()

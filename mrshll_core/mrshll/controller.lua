@@ -6,11 +6,11 @@ function mrshll.play_sound( event )
 	pen.play_sound({ "mods/mrshll_core/mrshll.bank", event })
 end
 
-function mrshll.new_tooltip( text, data )
+function mrshll.new_tip( text, data )
 	data = data or {}
 	data.frames = data.frames or 15
 	data.text_prefunc = function( text, data )
-		text = pen.get_hybrid_table( text )
+		text = pen.ght( text )
 		
 		local extra = 0
 		if( pen.vld( text[2])) then
@@ -20,13 +20,13 @@ function mrshll.new_tooltip( text, data )
 		return text[1], extra, 0
 	end
 	
-	return pen.new_tooltip( text, data, function( text, d )
+	return pen.new.tip( text, data, function( text, d )
 		local size_x, size_y = unpack( d.dims )
 		local pic_x, pic_y, pic_z = unpack( d.pos )
 		
 		local alpha = pen.animate( 1, d.t, { ease_in = "exp5", frames = d.frames })
 		if( pen.vld( text )) then
-			pen.new_text( pic_x + d.edging, pic_y + d.edging - 2, pic_z - 0.01, text, {
+			pen.new.text( pic_x + d.edging, pic_y + d.edging - 2, pic_z - 0.1, text, {
 				dims = { size_x - d.edging, size_y }, line_offset = d.line_offset or -2, fully_featured = true,
 				color = pen.PALETTE.HRMS.RED_3, alpha = alpha,
 			})
@@ -38,39 +38,39 @@ function mrshll.new_tooltip( text, data )
 		
 		local frame_sin = 80*( math.sin( GameGetFrameNum()/10 ) + 1 )
 		pen.colourer( gui, { 255 - frame_sin, 255, 255 })
-		pen.new_image( pic_x + size_x/2 - scale_x, pic_y + size_y/2 - scale_y, pic_z - 1, gui_core.."corner.png" )
+		pen.new.image( pic_x + size_x/2 - scale_x, pic_y + size_y/2 - scale_y, pic_z - 1, gui_core.."corner.png" )
 		pen.colourer( gui, { 255 - ( 160 - frame_sin ), 255, 255 })
-		pen.new_image( pic_x + size_x/2 + scale_x, pic_y + size_y/2 + scale_y, pic_z - 1, gui_core.."corner.png", { s_x = -1, s_y = -1 })
+		pen.new.image( pic_x + size_x/2 + scale_x, pic_y + size_y/2 + scale_y, pic_z - 1, gui_core.."corner.png", { s_x = -1, s_y = -1 })
 
-		pen.new_image( pic_x - 1, pic_y - 1, pic_z, gui_core.."module_A.png", { alpha = alpha })
-		pen.new_image( pic_x + 1, pic_y - 1, pic_z, gui_core.."module_B.png", { s_x = size_x - 2, s_y = 1, alpha = alpha })
-		pen.new_image( pic_x + size_x + 1, pic_y - 1, pic_z, gui_core.."module_A.png", { s_x = -1, s_y = 1 , alpha = alpha })
-		pen.new_image( pic_x + size_x + 1, pic_y + 1, pic_z, gui_core.."module_B.png", {
+		pen.new.image( pic_x - 1, pic_y - 1, pic_z, gui_core.."module_A.png", { alpha = alpha })
+		pen.new.image( pic_x + 1, pic_y - 1, pic_z, gui_core.."module_B.png", { s_x = size_x - 2, s_y = 1, alpha = alpha })
+		pen.new.image( pic_x + size_x + 1, pic_y - 1, pic_z, gui_core.."module_A.png", { s_x = -1, s_y = 1 , alpha = alpha })
+		pen.new.image( pic_x + size_x + 1, pic_y + 1, pic_z, gui_core.."module_B.png", {
 			s_x = size_y - 2, s_y = 1, angle = math.rad( 90 ), alpha = alpha })
-		pen.new_image( pic_x + size_x - 1, pic_y + size_y - 1, pic_z, gui_core.."module_C.png", { alpha = alpha })
-		pen.new_image( pic_x + 1, pic_y + size_y + 1, pic_z, gui_core.."module_B.png", { s_x = size_x - 2, s_y = -1, alpha = alpha })
-		pen.new_image( pic_x - 1, pic_y + size_y + 1, pic_z, gui_core.."module_A.png", { s_x = 1, s_y = -1, alpha = alpha })
-		pen.new_image( pic_x - 1, pic_y + size_y - 1, pic_z, gui_core.."module_B.png", {
+		pen.new.image( pic_x + size_x - 1, pic_y + size_y - 1, pic_z, gui_core.."module_C.png", { alpha = alpha })
+		pen.new.image( pic_x + 1, pic_y + size_y + 1, pic_z, gui_core.."module_B.png", { s_x = size_x - 2, s_y = -1, alpha = alpha })
+		pen.new.image( pic_x - 1, pic_y + size_y + 1, pic_z, gui_core.."module_A.png", { s_x = 1, s_y = -1, alpha = alpha })
+		pen.new.image( pic_x - 1, pic_y + size_y - 1, pic_z, gui_core.."module_B.png", {
 			s_x = size_y - 2, s_y = 1, angle = -math.rad( 90 ), alpha = alpha })
 		
-		pen.new_pixel( pic_x, pic_y, pic_z, pen.PALETTE.W, size_x, size_y, alpha )
+		pen.new.pixel( pic_x, pic_y, pic_z, pen.PALETTE.W, size_x, size_y, alpha )
 		
 		local s_alpha = 0.4*alpha
-		pen.new_image( pic_x - 3, pic_y - 3, pic_z + 0.001, gui_core.."shadow_A.png", {
+		pen.new.image( pic_x - 3, pic_y - 3, pic_z + 0.01, gui_core.."shadow_A.png", {
 			s_x = 0.5, s_y = 0.5, alpha = s_alpha })
-		pen.new_image( pic_x + 2.5, pic_y - 3, pic_z + 0.001, gui_core.."shadow_B.png", {
+		pen.new.image( pic_x + 2.5, pic_y - 3, pic_z + 0.01, gui_core.."shadow_B.png", {
 			s_x = size_x/2 - 2.5, s_y = 0.5, alpha = s_alpha })
-		pen.new_image( pic_x + size_x + 3, pic_y - 3, pic_z + 0.001, gui_core.."shadow_A.png", {
+		pen.new.image( pic_x + size_x + 3, pic_y - 3, pic_z + 0.01, gui_core.."shadow_A.png", {
 			s_x = -0.5, s_y = 0.5, alpha = s_alpha })
-		pen.new_image( pic_x + size_x + 3, pic_y + 2.5, pic_z + 0.001, gui_core.."shadow_B.png", {
+		pen.new.image( pic_x + size_x + 3, pic_y + 2.5, pic_z + 0.01, gui_core.."shadow_B.png", {
 			s_x = size_y/2 - 2, s_y = 0.5, alpha = s_alpha, angle = math.rad( 90 )})
-		pen.new_image( pic_x + size_x - 1.5, pic_y + size_y - 1.5, pic_z + 0.001, gui_core.."shadow_C.png", {
+		pen.new.image( pic_x + size_x - 1.5, pic_y + size_y - 1.5, pic_z + 0.01, gui_core.."shadow_C.png", {
 			s_x = 0.5, s_y = 0.5, alpha = s_alpha })
-		pen.new_image( pic_x + 2.5, pic_y + size_y + 3, pic_z + 0.001, gui_core.."shadow_B.png", {
+		pen.new.image( pic_x + 2.5, pic_y + size_y + 3, pic_z + 0.01, gui_core.."shadow_B.png", {
 			s_x = size_x/2 - 2, s_y = -0.5, alpha = s_alpha })
-		pen.new_image( pic_x - 3, pic_y + size_y + 3, pic_z + 0.001, gui_core.."shadow_A.png", {
+		pen.new.image( pic_x - 3, pic_y + size_y + 3, pic_z + 0.01, gui_core.."shadow_A.png", {
 			s_x = 0.5, s_y = -0.5, alpha = s_alpha })
-		pen.new_image( pic_x - 3, pic_y + size_y - 2.5, pic_z + 0.001, gui_core.."shadow_B.png", {
+		pen.new.image( pic_x - 3, pic_y + size_y - 2.5, pic_z + 0.01, gui_core.."shadow_B.png", {
 			s_x = size_y/2 - 2.5, s_y = 0.5, alpha = s_alpha, angle = -math.rad( 90 )})
 	end)
 end
@@ -82,26 +82,26 @@ function mrshll.new_button( pic_x, pic_y, pic_z, pic, data )
 	data.highlight = data.highlight or pen.PALETTE.HRMS.RED_2
 
 	data.lmb_event = data.lmb_event or function( pic_x, pic_y, pic_z, pic, d )
-		if( not( d.no_anim )) then pen.atimer( d.auid.."l", nil, true ) end
+		if( not( d.no_anim )) then pen.atm( d.auid.."l", nil, true ) end
 		return pic_x, pic_y, pic_z, pic, d
 	end
 	data.rmb_event = data.rmb_event or function( pic_x, pic_y, pic_z, pic, d )
-		if( not( d.no_anim )) then pen.atimer( d.auid.."r", nil, true ) end
+		if( not( d.no_anim )) then pen.atm( d.auid.."r", nil, true ) end
 		return pic_x, pic_y, pic_z, pic, d
 	end
 	data.hov_event = data.hov_event or function( pic_x, pic_y, pic_z, pic, d )
 		if( pen.vld( d.tip )) then
 			pen.uncutter( function( cut_x, cut_y, cut_w, cut_h )
-				return mrshll.new_tooltip( d.tip, { is_active = true , pic_z = d.tip_z, fid = ( d.jpad or {})[1]})
+				return mrshll.new_tip( d.tip, { is_active = true , pic_z = d.tip_z, fid = ( d.jpad or {})[1]})
 			end)
 		end
-		if( pen.vld( d.highlight )) then pen.new_pixel(
-			pic_x - 1, pic_y - 1, pic_z + 0.001, d.highlight,
+		if( pen.vld( d.highlight )) then pen.new.pixel(
+			pic_x - 1, pic_y - 1, pic_z + 0.01, d.highlight,
 			( d.s_x or 1 )*d.dims[1] + 2, ( d.s_y or 1 )*d.dims[2] + 2 ) end
 		return pic_x, pic_y, pic_z, pic, d
 	end
 
-	return pen.new_button( pic_x, pic_y, pic_z, pic, data )
+	return pen.new.button( pic_x, pic_y, pic_z, pic, data )
 end
 
 local entity_id = index_mrshll_id or GetUpdatedEntityID()
@@ -127,9 +127,7 @@ local this_ignored = pen.t.clone( ignored[ playlist_num ])
 pen.t.loop({ "left", "right" }, function( i, v )
 	local speaker = pen.get_child( entity_id, v )
 	if( not( pen.vld( speaker, true ))) then return end
-	
-	local pos = { -30, 30 }
-	EntitySetTransform( speaker, x + pos[i], y - 10 )
+	EntitySetTransform( speaker, x + ( i == 1 and -30 or 30 ), y - 10 )
 	
 	local a_comp = EntityGetFirstComponentIncludingDisabled( speaker, "AudioLoopComponent" )
 	if( not( pen.vld( a_comp, true ))) then return end
@@ -138,6 +136,7 @@ pen.t.loop({ "left", "right" }, function( i, v )
 end)
 
 local num, delay = 0, 10
+local frame_num = GameGetFrameNum()
 mrshll.filtering = mrshll.filtering or 0
 mrshll.is_moving = mrshll.is_moving or false
 mrshll.is_listing = mrshll.is_listing or false
@@ -291,6 +290,7 @@ if( mrshll.gonna_play ) then
 			pen.magic_storage( entity_id, "sound_event", "value_string", song.fmod_event )
 			pen.magic_storage( entity_id, "current_volume", "value_float", volume + ( song.custom_volume or 0 ))
 
+			mrshll.song_frame = frame_num + 90
 			EntityAddTag( entity_id, "index_pic_update" )
 			pen.magic_storage( entity_id, "index_pic_anim", "value_string", "|mods/mrshll_core/mrshll/anim/|5|5|" )
 		else
@@ -314,9 +314,9 @@ elseif( is_playing ~= 0 ) then
 	pen.magic_storage( entity_id, "index_pic_anim", "value_string", "|mods/mrshll_core/mrshll/anim/|5|1|" )
 end
 
-local gui = pen.gui_builder()
+local gui = pen.new.builder()
 local is_going = pen.get_active_item( hooman ) == entity_id
-local pic_x, pic_y, pic_z, clicked, r_clicked = pos[1], pos[2], pen.LAYERS.MAIN, false, false
+local pic_x, pic_y, pic_z, clicked, r_clicked = pos[1], pos[2], pen.LAYERS.BACKGROUND + 10, false, false
 
 local play = false
 local forward = false
@@ -338,7 +338,7 @@ if( pen.vld( storage_open, true ) and not( pen.is_inv_active( hooman ))) then
 			is_centered = true, no_anim = true,
 			hov_event = function( pic_x, pic_y, pic_z, pic, d )
 				d.angle = math.rad( 15 )
-				mrshll.new_tooltip( "Toggle Marshall GUI", { is_active = true, fid = ( d.jpad or {})[1]})
+				mrshll.new_tip( "Toggle Marshall GUI", { is_active = true, fid = ( d.jpad or {})[1]})
 				return pic_x, pic_y, pic_z, pic, d
 			end,
 		})
@@ -352,10 +352,10 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	if( not( no_dragger )) then
 		if( mrshll.is_moving ) then
 			local new_x, new_y, state, is_hovered = 0, 0, 0, false
-			new_x, new_y, state, _, r_clicked, is_hovered = pen.new_dragger( "mrshll_dragger", pic_x, pic_y - 11, 10, 10, nil, { jpad = true })
+			new_x, new_y, state, _, r_clicked, is_hovered = pen.new.dragger( "mrshll_dragger", pic_x, pic_y - 11, 10, 10, nil, { jpad = true })
 			if( new_x ~= pic_x or new_y + 11 ~= pic_y ) then pen.setting_set( "mrshll_core.UI_POS", pen.t.pack({ new_x, new_y + 11 })) end
 			if( r_clicked ) then mrshll.play_sound( "ass/special_button" ); mrshll.is_moving = not( mrshll.is_moving ) end
-			mrshll.new_tooltip({ GameTextGet( "$mrshll_dragger_aa" ), GameTextGet( "$mrshll_dragger_ab" )}, { is_active = is_hovered and state ~= 2, fid = "dragger_mrshll_dragger_focus" })
+			mrshll.new_tip({ GameTextGet( "$mrshll_dragger_aa" ), GameTextGet( "$mrshll_dragger_ab" )}, { is_active = is_hovered and state ~= 2, fid = "dragger_mrshll_dragger_focus" })
 		end
 
 		_,r_clicked = mrshll.new_button( pic_x, pic_y - 11, pic_z,
@@ -384,12 +384,12 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		text, genre, duration = song.artist.." - "..song.name, song_id[1], song.duration
 	end
 	local dist = math.max( pen.get_text_dims( text, true ) + 2, mrshll.is_listing and 94 or 1 )
-	pen.new_image( pic_x + 11, pic_y, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
-	pen.new_image( pic_x + 12, pic_y, pic_z, "mods/mrshll_core/mrshll/window_B.png", { s_x = dist, s_y = 1 })
-	pen.new_image( pic_x + 12 + dist, pic_y, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
+	pen.new.image( pic_x + 11, pic_y, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
+	pen.new.image( pic_x + 12, pic_y, pic_z, "mods/mrshll_core/mrshll/window_B.png", { s_x = dist, s_y = 1 })
+	pen.new.image( pic_x + 12 + dist, pic_y, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
 	mrshll.new_button( pic_x + 11, pic_y, pic_z, pen.FILE_PIC_NIL, {
 		s_x = dist/2 + 1, s_y = 5, no_anim = true, tip = { GameTextGet( "$mrshll_genre" ), genre }})
-	pen.new_text( pic_x + 13, pic_y, pic_z - 0.01, text, { color = pen.PALETTE.HRMS.RED_3 })
+	pen.new.text( pic_x + 13, pic_y, pic_z - 0.1, text, { color = pen.PALETTE.HRMS.RED_3 })
 
 	local tm, true_tm = "00:00", 0
 	if( mrshll.last_played > 0 ) then
@@ -399,13 +399,13 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		tm = string.sub( tostring( 100 + math.min( mins, 99 )), -2 )..":"..string.sub( tostring( 100 + secs ), -2 )
 		true_tm = math.floor( true_tm )
 	end
-	pen.new_image( pic_x + 11, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
-	pen.new_image( pic_x + 12, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_B.png", { s_x = 27, s_y = 1 })
-	pen.new_image( pic_x + 39, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
+	pen.new.image( pic_x + 11, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
+	pen.new.image( pic_x + 12, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_B.png", { s_x = 27, s_y = 1 })
+	pen.new.image( pic_x + 39, pic_y + 11, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
 	mrshll.new_button( pic_x + 11, pic_y + 11, pic_z, pen.FILE_PIC_NIL, {
 		s_x = 29/2, s_y = 5, no_anim = true,
 		tip = { GameTextGet( "$mrshll_time" ), true_tm > 0 and string.format( "%.1f", 100*math.min( true_tm/duration, 1 )).."%" or "" }})
-	pen.new_text( pic_x + 13, pic_y + 11, pic_z - 0.01, tm, { color = pen.PALETTE.HRMS.RED_3 })
+	pen.new.text( pic_x + 13, pic_y + 11, pic_z - 0.1, tm, { color = pen.PALETTE.HRMS.RED_3 })
 
 	clicked = mrshll.new_button( pic_x + 11, pic_y + 22, pic_z,
 		"mods/mrshll_core/mrshll/"..( mrshll.is_listing and "close" or "playlist" )..".png", { jpad = true,
@@ -413,14 +413,14 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	if( clicked ) then
 		mrshll.play_sound( "ass/special_button" )
 		mrshll.is_listing, mrshll.is_showing = not( mrshll.is_listing ), false
-		if( mrshll.is_listing ) then pen.atimer( "main_window", nil, true ) end
+		if( mrshll.is_listing ) then pen.atm( "main_window", nil, true ) end
 	end
 	if( mrshll.is_listing ) then
 		scroller_id = ( mrshll.is_showing and "excluded_" or "playlist_" )..playlist_num
 
 		local cnt = 0
 		local anim = -10*( 1 - pen.animate( 1, "main_window", { ease_out = { "exp", "wav1" }, frames = 15, stillborn = true }))
-		pen.try( pen.new_scroller, { scroller_id, pic_x + 12, pic_y + 32, pic_z + 0.01, 95, 111 + anim, function( scroll_pos )
+		pen.try( pen.new.scroller, { scroller_id, pic_x + 12, pic_y + 32, pic_z + 0.1, 95, 111 + anim, function( scroll_pos )
 			local height, accum = 0, 0
 			local active_jpads, is_jpad = {}, false
 			pen.t.loop( mrshll.is_showing and this_ignored or this_ordered, function( i, v )
@@ -442,7 +442,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 					ease_out = { "exp", "wav1" }, frames = 10, stillborn = true }))
 				
 				if( mrshll.is_showing or #this_ordered > 1 ) then
-					_,r_clicked,_,is_jpad = mrshll.new_button( 86, pos_y + drift, pic_z - 0.03,
+					_,r_clicked,_,is_jpad = mrshll.new_button( 86, pos_y + drift, pic_z - 0.3,
 						"mods/mrshll_core/mrshll/playlist_toggle_"..( mrshll.is_showing and "B" or "A" )..".png", {
 						auid = "mrshll_exclude_"..song.id, tip = { GameTextGet( mrshll.is_showing and "$mrshll_toggle_aa" or "$mrshll_toggle_ba" ), GameTextGet( mrshll.is_showing and "$mrshll_toggle_ab" or "$mrshll_toggle_bb" )}, jpad = true })
 					if( is_jpad ) then active_jpads[ is_jpad ] = true end
@@ -461,10 +461,10 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 					end
 				end
 				
-				pen.new_text( 3, pos_y + drift, pic_z - 0.02, song.name, { aggressive = true, dims = {88,0},
+				pen.new.text( 3, pos_y + drift, pic_z - 0.2, song.name, { aggressive = true, dims = {88,0},
 					color = pen.PALETTE.HRMS[ mrshll.is_showing and "GREY_2" or ( mrshll.last_played == i and "GOLD_3" or "RED_3" )]})
 				
-				clicked, r_clicked, _, is_jpad = mrshll.new_button( 1, pos_y + drift, pic_z - 0.01,
+				clicked, r_clicked, _, is_jpad = mrshll.new_button( 1, pos_y + drift, pic_z - 0.1,
 					"mods/mrshll_core/mrshll/playlist_line.png", { auid = "mrshll_song_"..song.id,
 					tip = { song.artist.." - "..song.name, mrshll.is_showing and "" or GameTextGet( "$mrshll_line" )}, jpad = true })
 				if( is_jpad ) then active_jpads[ is_jpad ] = true end
@@ -476,7 +476,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 						ComponentSetValue2( storage_delay, "value_float", 0 )
 					elseif( r_clicked and i > 1 ) then
 						mrshll.play_sound( "ass/tab_hover" )
-						pen.atimer( "button_"..song.id, nil, true )
+						pen.atm( "button_"..song.id, nil, true )
 						local memo = this_ordered[ i ]
 						this_ordered[ i ] = this_ordered[ i - 1 ]
 						this_ordered[ i - 1 ] = memo
@@ -515,7 +515,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		playlist_next, playlist_last = mrshll.new_button( pic_x, pic_y + 134 + anim, pic_z,
 			"mods/mrshll_core/mrshll/playlist_num.png", { jpad = true,
 			auid = "mrshll_playlist", tip = GameTextGet( "$mrshll_switch" )})
-		pen.new_text( pic_x + 2, pic_y + 134 + anim, pic_z - 0.01, string.char( playlist_num + 64 ), { color = pen.PALETTE.HRMS.RED_3 })
+		pen.new.text( pic_x + 2, pic_y + 134 + anim, pic_z - 0.1, string.char( playlist_num + 64 ), { color = pen.PALETTE.HRMS.RED_3 })
 		
 		_,r_clicked = mrshll.new_button( pic_x + 97, pic_y + 11, pic_z,
 			"mods/mrshll_core/mrshll/reset.png", { jpad = true,
@@ -532,11 +532,11 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			reset()
 		end
 
-		pen.new_text( pic_x + 59.5, pic_y + 22, pic_z,
+		pen.new.text( pic_x + 59.5, pic_y + 22, pic_z,
 			string.upper( mrshll.filter_list[ mrshll.filtering ] or ( GameTextGet( mrshll.is_showing and "$mrshll_title_b" or "$mrshll_title_a" ))), {
 			dims = {74,0}, aggressive = true, is_centered_x = true, color = pen.PALETTE.HRMS[ mrshll.filtering == 0 and "RED_3" or "GOLD_3" ]})
-		clicked, r_clicked = pen.new_interface( pic_x + 22, pic_y + 22, 74, 10, pic_z, { jpad = { "mrshll_title", false, true }})
-		mrshll.new_tooltip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )}, { fid = "mrshll_title" })
+		clicked, r_clicked = pen.new.interface( pic_x + 22, pic_y + 22, 74, 10, pic_z, { jpad = { "mrshll_title", false, true }})
+		mrshll.new_tip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )}, { fid = "mrshll_title" })
 		if( clicked or r_clicked ) then
 			pen.c.estimator_memo[ scroller_id.."_anim_y" ] = 0
 			pen.c.scroll_memo[ scroller_id ].py = 0
@@ -547,12 +547,18 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 			mrshll.play_sound( "ass/special_button" )
 		end
 
-		pen.new_image( pic_x + 11, pic_y + 22, pic_z + 0.01, "mods/mrshll_core/mrshll/window_playlist.png", { can_click = true })
-		pen.new_image( pic_x + 11, pic_y + 122 + anim, pic_z + 0.011, "mods/mrshll_core/mrshll/window_playlist_bottom.png" )
+		pen.new.image( pic_x + 11, pic_y + 22, pic_z + 0.1, "mods/mrshll_core/mrshll/window_playlist.png", { can_click = true })
+		pen.new.image( pic_x + 11, pic_y + 122 + anim, pic_z + 0.2, "mods/mrshll_core/mrshll/window_playlist_bottom.png" )
 	end
+elseif(( mrshll.song_frame or -1 ) > frame_num ) then
+	local dt = 20 - ( mrshll.song_frame - frame_num )
+	local song_id = this_ordered[ mrshll.last_played ]
+	local song = pen.t.get( mrshll.list[ song_id[1]], song_id[2])
+	if( dt > 0 ) then pic_y = pic_y - ( pic_y + 20 )*pen.animate( 1, dt, { ease_out = "sin0.1", frames = 20 }) end
+	mrshll.new_tip( song.artist.." - "..song.name, { tid = "mrshll_note", is_active = true, pos = { pic_x, pic_y }})
 end
 
-pen.gui_builder( true )
+pen.new.builder( true )
 
 if( play or mnee.mnin( "bind", { "mrshll_core", "play" }, { pressed = true })) then
 	mrshll.play_sound( "ass/generic_button" )
