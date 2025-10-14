@@ -28,7 +28,7 @@ function mrshll.new_tip( text, data )
 		if( pen.vld( text )) then
 			pen.new.text( pic_x + d.edging, pic_y + d.edging - 2, pic_z - 0.1, text, {
 				dims = { size_x - d.edging, size_y }, line_offset = d.line_offset or -2, fully_featured = true,
-				color = pen.PALETTE.HRMS.RED_3, alpha = alpha,
+				color = pen.P.HRMS.RED_3, alpha = alpha,
 			})
 		end
 		
@@ -53,7 +53,7 @@ function mrshll.new_tip( text, data )
 		pen.new.image( pic_x - 1, pic_y + size_y - 1, pic_z, gui_core.."module_B.png", {
 			s_x = size_y - 2, s_y = 1, angle = -math.rad( 90 ), alpha = alpha })
 		
-		pen.new.pixel( pic_x, pic_y, pic_z, pen.PALETTE.W, size_x, size_y, alpha )
+		pen.new.pixel( pic_x, pic_y, pic_z, pen.P.W, size_x, size_y, alpha )
 		
 		local s_alpha = 0.4*alpha
 		pen.new.image( pic_x - 3, pic_y - 3, pic_z + 0.01, gui_core.."shadow_A.png", {
@@ -79,7 +79,7 @@ function mrshll.new_button( pic_x, pic_y, pic_z, pic, data )
 	data = data or {}
 	data.ignore_multihover = false
 	data.frames = data.frames or 20
-	data.highlight = data.highlight or pen.PALETTE.HRMS.RED_2
+	data.highlight = data.highlight or pen.P.HRMS.RED_2
 
 	data.lmb_event = data.lmb_event or function( pic_x, pic_y, pic_z, pic, d )
 		if( not( d.no_anim )) then pen.atm( d.auid.."l", nil, true ) end
@@ -316,7 +316,7 @@ end
 
 local gui = pen.new.builder()
 local is_going = pen.get_active_item( hooman ) == entity_id
-local pic_x, pic_y, pic_z, clicked, r_clicked = pos[1], pos[2], pen.LAYERS.BACKGROUND + 10, false, false
+local pic_x, pic_y, pic_z, clicked, r_clicked = pos[1], pos[2], pen.Z.BACKGROUND + 10, false, false
 
 local play = false
 local forward = false
@@ -332,7 +332,7 @@ if( pen.vld( storage_open, true ) and not( pen.is_inv_active( hooman ))) then
 	is_going = ComponentGetValue2( storage_open, "value_bool" )
 	
 	if( not( ModIsEnabled( "index_core" ))) then  
-		clicked = mrshll.new_button( 6, 6, pen.LAYERS.FOREGROUND,
+		clicked = mrshll.new_button( 6, 6, pen.Z.FOREGROUND,
 			"mods/mrshll_core/mrshll/item.png", {
 			auid = "mrshll_main", jpad = true,
 			is_centered = true, no_anim = true,
@@ -389,7 +389,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	pen.new.image( pic_x + 12 + dist, pic_y, pic_z, "mods/mrshll_core/mrshll/window_A.png" )
 	mrshll.new_button( pic_x + 11, pic_y, pic_z, pen.FILE_PIC_NIL, {
 		s_x = dist/2 + 1, s_y = 5, no_anim = true, tip = { GameTextGet( "$mrshll_genre" ), genre }})
-	pen.new.text( pic_x + 13, pic_y, pic_z - 0.1, text, { color = pen.PALETTE.HRMS.RED_3 })
+	pen.new.text( pic_x + 13, pic_y, pic_z - 0.1, text, { color = pen.P.HRMS.RED_3 })
 
 	local tm, true_tm = "00:00", 0
 	if( mrshll.last_played > 0 ) then
@@ -405,7 +405,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 	mrshll.new_button( pic_x + 11, pic_y + 11, pic_z, pen.FILE_PIC_NIL, {
 		s_x = 29/2, s_y = 5, no_anim = true,
 		tip = { GameTextGet( "$mrshll_time" ), true_tm > 0 and string.format( "%.1f", 100*math.min( true_tm/duration, 1 )).."%" or "" }})
-	pen.new.text( pic_x + 13, pic_y + 11, pic_z - 0.1, tm, { color = pen.PALETTE.HRMS.RED_3 })
+	pen.new.text( pic_x + 13, pic_y + 11, pic_z - 0.1, tm, { color = pen.P.HRMS.RED_3 })
 
 	clicked = mrshll.new_button( pic_x + 11, pic_y + 22, pic_z,
 		"mods/mrshll_core/mrshll/"..( mrshll.is_listing and "close" or "playlist" )..".png", { jpad = true,
@@ -462,7 +462,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 				end
 				
 				pen.new.text( 3, pos_y + drift, pic_z - 0.2, song.name, { aggressive = true, dims = {88,0},
-					color = pen.PALETTE.HRMS[ mrshll.is_showing and "GREY_2" or ( mrshll.last_played == i and "GOLD_3" or "RED_3" )]})
+					color = pen.P.HRMS[ mrshll.is_showing and "GREY_2" or ( mrshll.last_played == i and "GOLD_3" or "RED_3" )]})
 				
 				clicked, r_clicked, _, is_jpad = mrshll.new_button( 1, pos_y + drift, pic_z - 0.1,
 					"mods/mrshll_core/mrshll/playlist_line.png", { auid = "mrshll_song_"..song.id,
@@ -491,11 +491,11 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 			return { height + 5, 1, active_jpads }
 		end, { jpad = true, bar_colors = {
-			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
-			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
-			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
-			pen.PALETTE.HRMS.GOLD_2, pen.PALETTE.HRMS.RED_2,
-			pen.PALETTE.HRMS.GOLD_3, pen.PALETTE.HRMS.RED_3
+			pen.P.HRMS.GOLD_2, pen.P.HRMS.RED_2,
+			pen.P.HRMS.GOLD_2, pen.P.HRMS.RED_2,
+			pen.P.HRMS.GOLD_2, pen.P.HRMS.RED_2,
+			pen.P.HRMS.GOLD_2, pen.P.HRMS.RED_2,
+			pen.P.HRMS.GOLD_3, pen.P.HRMS.RED_3
 		}}})
 
 		clicked = mrshll.new_button( pic_x + 97, pic_y + 22, pic_z,
@@ -515,7 +515,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 		playlist_next, playlist_last = mrshll.new_button( pic_x, pic_y + 134 + anim, pic_z,
 			"mods/mrshll_core/mrshll/playlist_num.png", { jpad = true,
 			auid = "mrshll_playlist", tip = GameTextGet( "$mrshll_switch" )})
-		pen.new.text( pic_x + 2, pic_y + 134 + anim, pic_z - 0.1, string.char( playlist_num + 64 ), { color = pen.PALETTE.HRMS.RED_3 })
+		pen.new.text( pic_x + 2, pic_y + 134 + anim, pic_z - 0.1, string.char( playlist_num + 64 ), { color = pen.P.HRMS.RED_3 })
 		
 		_,r_clicked = mrshll.new_button( pic_x + 97, pic_y + 11, pic_z,
 			"mods/mrshll_core/mrshll/reset.png", { jpad = true,
@@ -534,7 +534,7 @@ if( is_going and not( pen.is_inv_active( hooman ))) then
 
 		pen.new.text( pic_x + 59.5, pic_y + 22, pic_z,
 			string.upper( mrshll.filter_list[ mrshll.filtering ] or ( GameTextGet( mrshll.is_showing and "$mrshll_title_b" or "$mrshll_title_a" ))), {
-			dims = {74,0}, aggressive = true, is_centered_x = true, color = pen.PALETTE.HRMS[ mrshll.filtering == 0 and "RED_3" or "GOLD_3" ]})
+			dims = {74,0}, aggressive = true, is_centered_x = true, color = pen.P.HRMS[ mrshll.filtering == 0 and "RED_3" or "GOLD_3" ]})
 		clicked, r_clicked = pen.new.interface( pic_x + 22, pic_y + 22, 74, 10, pic_z, { jpad = { "mrshll_title", false, true }})
 		mrshll.new_tip( mrshll.is_showing and GameTextGet( "$mrshll_title_tip_ba" ) or { GameTextGet( "$mrshll_title_tip_aa" ), GameTextGet( "$mrshll_title_tip_ab" )}, { fid = "mrshll_title" })
 		if( clicked or r_clicked ) then
