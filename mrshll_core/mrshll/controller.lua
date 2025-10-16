@@ -53,7 +53,7 @@ function mrshll.new_tip( text, data )
 		pen.new.image( pic_x - 1, pic_y + size_y - 1, pic_z, gui_core.."module_B.png", {
 			s_x = size_y - 2, s_y = 1, angle = -math.rad( 90 ), alpha = alpha })
 		
-		pen.new.pixel( pic_x, pic_y, pic_z, pen.P.W, size_x, size_y, alpha )
+		pen.new.pixel( pic_x, pic_y, pic_z, pen.P.WHITE, size_x, size_y, alpha )
 		
 		local s_alpha = 0.4*alpha
 		pen.new.image( pic_x - 3, pic_y - 3, pic_z + 0.01, gui_core.."shadow_A.png", {
