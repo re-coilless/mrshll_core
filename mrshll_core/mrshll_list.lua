@@ -1,16 +1,17 @@
 local bank_file = "mods/mrshll_core/mrshll.bank"
 
 --use this for automatic processing https://github.com/M0n7y5/FenixProFmod (thanks Lamia)
+--https://github.com/synnys/FMOD-Studio-Batch-Audio-Import-Script
 
 --the tutorial (real)
---1. get all the songs you want on .ogg format (this allows for best quality at least size)
+--1. get all the songs you want in .ogg format (this allows for the best quality at the least size)
 --2. rename all the tracks to a uniform standard (so, for Phantom Pack, I had filenames like "phantom05.ogg")
 --3. separate every single track into their left and right channels (filename should be "phantom05_l.ogg" and "phantom05_r.ogg")
 --4. download FMOD 2.01.05
 --[WIP] 5. download the starting project (it contains templates for both the extension mod and fmod project)
---6. make sure to copy the event so guids get generated
+--6. make sure to duplicate the premade so guids get regenerated and then delete the old one
 --7. add compression to tracks
---8. make sure to leave plenty of empty space in the loop, as a safety measure
+--8. make sure to leave at least a second of silence in the loop region, as a safety measure
 --9. add distance condition
 --10. it is highly recommended to balance all the music audio by manually comparing their levels and adjusting the gains accordingly
 --11. setup the table (names + events + duration in seconds *60 to convert to frames)
