@@ -27,7 +27,44 @@ end
 function OnWorldPreUpdate()
 	if( not( ModIsEnabled( "mnee" ))) then
 		GamePrint( "[M-NEE IS REQUIRED] - check the mod's page" )
+		return
 	end
+
+	local queue = pen.t.pack( GlobalsGetValue( "MRSHLL_OST_QUEUE", "" ))
+	if( not( pen.vld( queue ))) then return end
+
+	local playlist = {}
+	pen.t.loop( queue, function( i, file )
+		if( not( ModDoesFileExist( file ))) then return end
+		playlist = dofile_once( file )( playlist )
+	end)
+	if( not( pen.vld( playlist ))) then return end
+
+	local energy = GlobalsGetValue( "MRSHLL_OST_ENERGY", "" ) --from 0 to 1
+	if( ModIsEnabled( "vector_core" )) then
+		local hooman = pen.get_hooman()
+		if( pen.vld( hooman, true )) then
+			local stress = pen.magic_storage( hooman, "stress", "value_float" )
+			if( pen.vld( stress )) then
+				local peak_stress = tonumber( GlobalsGetValue( "VECTOR_PEAK_STRESS", "1000" ))
+				energy = stress/peak_stress
+			end
+		end
+	end
+	if( energy == "" ) then
+		energy = tonumber( energy ) or 0
+	end
+
+	--write name of the current song to a global
+	--use ModRegisterMusicBank( filename:string ) with silent track to remove all vanilla music, add a setting to disable this
+
+	local cam_x, cam_y = GameGetCameraPos()
+	local biome_name = BiomeMapGetName( cam_x, cam_y )
+	local _,_,biome_file = string.find( DebugBiomeMapGetFilename( cam_x, cam_y ), ".+/(.-).xml" )
+
+	--"mrshll_ost_marker"
+	--find all entities with this, check their varstorage for the track params (value_string) + priority (value_int) + energy mult (value_float)
+	--ensure there's a pause in between biome tracks, every track has to play for at least 20 seconds
 end
 
 function OnPlayerSpawned( hooman )
