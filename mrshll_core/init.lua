@@ -55,16 +55,58 @@ function OnWorldPreUpdate()
 		energy = tonumber( energy ) or 0
 	end
 
-	--write name of the current song to a global
 	--use ModRegisterMusicBank( filename:string ) with silent track to remove all vanilla music, add a setting to disable this
+	
+	local event, duration = {}, 0
+	local track_override = pen.t.pack( GlobalsGetValue( "MRSHLL_OST_FORCED", "" ))
+	if( pen.vld( track_override )) then
+		event = { track_override[1], track_override[2]}
+		duration = track_override[3]
+	else
+		local cam_x, cam_y = GameGetCameraPos()
+		local biome_name = BiomeMapGetName( cam_x, cam_y )
+		local _,_,biome_file = string.find( DebugBiomeMapGetFilename( cam_x, cam_y ), "^.+/(.-).xml$" )
+		local track_data = pen.t.loop( pen.t.order( playlist ), function( i,v )
+			if( not( pen.ghf( v.is_active, { energy, biome_name, biome_file }))) then return end
+			if( energy < v.energy[1] or energy > v.energy[2]) then return end
+			local name_check = pen.t.get( pen.ght( v.biome_name ), biome_name )
+			local file_check = pen.t.get( pen.ght( v.biome_file ), biome_file )
+			if( name_check == 0 and file_check == 0 ) then return end
+			return pen.t.clone( v )
+		end) or { event = {}}
+		
+		-- pen.debug_print( biome_name, 50, 50, true )
+		-- pen.debug_print( biome_file, 50, 75, true )
 
-	local cam_x, cam_y = GameGetCameraPos()
-	local biome_name = BiomeMapGetName( cam_x, cam_y )
-	local _,_,biome_file = string.find( DebugBiomeMapGetFilename( cam_x, cam_y ), ".+/(.-).xml" )
+		pen.t.loop( EntityGetWithTag( "mrshll_ost_marker" ), function( i,marker_id )
+			local storage = pen.magic_storage( marker_id, "mrshll_ost_marker" )
+			if( not( pen.vld( storage, true ))) then return end
+			if( not( ComponentGetValue2( storage, "value_bool" ))) then return end
+			local m_x, m_y = EntityGetTransform( marker_id )
+			local dist = math.min( math.log(( m_x - cam_x )^2 + ( m_y - cam_y )^2 ), 2 )
+			local priority = ComponentGetValue2( storage, "value_float" )
+			if( priority > ( track_data.order_id or 0 ) and priority/dist > ( track_data.best_priotity or 0 )) then
+				track_data.event = pen.t.pack( ComponentGetValue2( storage, "value_string" ))
+				track_data.best_priority = priority/dist
+				track_data.order_id = 0
+				track_data.name = ""
+			end
+		end)
 
-	--"mrshll_ost_marker"
-	--find all entities with this, check their varstorage for the track params (value_string) + priority (value_int) + energy mult (value_float)
-	--ensure there's a pause in between biome tracks, every track has to play for at least 20 seconds
+		if( pen.vld( track_data.name )) then
+			GlobalsSetValue( "MRSHLL_OST_NAME", track_data.name ) end
+		event = { track_data.event[1], track_data.event[2]}
+		duration = track_data.event[3]
+	end
+
+	if( not( pen.vld( event ))) then return end
+	
+	--only transition to a new track if the track event is different
+
+	--global to override volume (for cutscenes and mrshll)
+	--music shoudl always start playing on new biome ntrance
+	--do volume fading out through pen.estimate
+	--ensure there's an inherent pause in between biome tracks (support looping tracks), every track has to play for at least 1000 frames
 end
 
 function OnPlayerSpawned( hooman )
