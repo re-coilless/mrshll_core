@@ -314,6 +314,9 @@ elseif( is_playing ~= 0 ) then
 	pen.magic_storage( entity_id, "index_pic_anim", "value_string", "|mods/mrshll_core/mrshll/anim/|5|1|" )
 end
 
+GlobalsSetValue( "MRSHLL_OST_VOLUME_", pen.estimate(
+	"mrshll_ost_volume_fade", { mrshll.gonna_play and 0 or 1, 1 }, "exp50" ))
+
 local gui = pen.new.builder()
 local is_going = pen.get_active_item( hooman ) == entity_id
 local pic_x, pic_y, pic_z, clicked, r_clicked = pos[1], pos[2], pen.Z.BACKGROUND + 10, false, false

@@ -1,4 +1,4 @@
-<Entity name="mrshll_ctrl" >
+<Entity name="mrshll_ost" >
 	<LuaComponent
 		_tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
 		script_source_file="mods/mrshll_core/mrshll/sound_controller.lua"
@@ -38,16 +38,4 @@
 		name="time_sync"
 		value_float="0"
 	></VariableStorageComponent>
-	
-	<VariableStorageComponent
-		name="playlist"
-		value_string=""
-	></VariableStorageComponent>
-	
-	<LuaComponent
-		_tags="enabled_in_world,enabled_in_hand,enabled_in_inventory"
-		script_source_file="mods/mrshll_core/mrshll/controller.lua"
-		execute_every_n_frame="1"
-		vm_type="ONE_PER_COMPONENT_INSTANCE"
-	></LuaComponent>
 </Entity>

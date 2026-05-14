@@ -1,4 +1,5 @@
 ModRegisterAudioEventMappings( "mods/mrshll_core/GUIDs.txt" )
+ModRegisterMusicBank( "mods/mrshll_core/silence.bank" )
 
 if( ModIsEnabled( "mnee" )) then
 	ModLuaFileAppend( "mods/mnee/bindings.lua", "mods/mrshll_core/mnee.lua" )
@@ -40,9 +41,10 @@ function OnWorldPreUpdate()
 	end)
 	if( not( pen.vld( playlist ))) then return end
 
+	local hooman = pen.get_hooman()
+	if( not( pen.vld( hooman, true ))) then return end
 	local energy = GlobalsGetValue( "MRSHLL_OST_ENERGY", "" ) --from 0 to 1
 	if( ModIsEnabled( "vector_core" )) then
-		local hooman = pen.get_hooman()
 		if( pen.vld( hooman, true )) then
 			local stress = pen.magic_storage( hooman, "stress", "value_float" )
 			if( pen.vld( stress )) then
@@ -54,14 +56,13 @@ function OnWorldPreUpdate()
 	if( energy == "" ) then
 		energy = tonumber( energy ) or 0
 	end
-
-	--use ModRegisterMusicBank( filename:string ) with silent track to remove all vanilla music, add a setting to disable this
 	
-	local event, duration = {}, 0
+	local event = {}
+	local is_biome = true
 	local track_override = pen.t.pack( GlobalsGetValue( "MRSHLL_OST_FORCED", "" ))
 	if( pen.vld( track_override )) then
-		event = { track_override[1], track_override[2]}
-		duration = track_override[3]
+		event = track_override
+		is_biome = false
 	else
 		local cam_x, cam_y = GameGetCameraPos()
 		local biome_name = BiomeMapGetName( cam_x, cam_y )
@@ -74,9 +75,6 @@ function OnWorldPreUpdate()
 			if( name_check == 0 and file_check == 0 ) then return end
 			return pen.t.clone( v )
 		end) or { event = {}}
-		
-		-- pen.debug_print( biome_name, 50, 50, true )
-		-- pen.debug_print( biome_file, 50, 75, true )
 
 		pen.t.loop( EntityGetWithTag( "mrshll_ost_marker" ), function( i,marker_id )
 			local storage = pen.magic_storage( marker_id, "mrshll_ost_marker" )
@@ -90,23 +88,100 @@ function OnWorldPreUpdate()
 				track_data.best_priority = priority/dist
 				track_data.order_id = 0
 				track_data.name = ""
+				is_biome = false
 			end
 		end)
 
 		if( pen.vld( track_data.name )) then
 			GlobalsSetValue( "MRSHLL_OST_NAME", track_data.name ) end
-		event = { track_data.event[1], track_data.event[2]}
-		duration = track_data.event[3]
+		event = track_data.event
 	end
-
-	if( not( pen.vld( event ))) then return end
 	
-	--only transition to a new track if the track event is different
+	local x, y = EntityGetTransform( hooman )
+	local ost_id = EntityGetWithName( "mrshll_ost" )
+	if( not( pen.vld( ost_id, true ))) then
+		ost_id = EntityLoad( "mods/mrshll_core/mrshll/ost.xml", x, y )
+	else EntitySetTransform( ost_id, x, y ) end
 
-	--global to override volume (for cutscenes and mrshll)
-	--music shoudl always start playing on new biome ntrance
-	--do volume fading out through pen.estimate
-	--ensure there's an inherent pause in between biome tracks (support looping tracks), every track has to play for at least 1000 frames
+	local fading, track_id = 1, ""
+	local frame_num = GameGetFrameNum()
+	local is_empty = not( pen.vld( event ))
+	pen.c.estimator_memo = pen.c.estimator_memo or {}
+	pen.c.mrshll_ost_data = pen.c.mrshll_ost_data or {}
+	if( not( is_empty )) then track_id = event[1]..event[2] end
+	if( pen.c.mrshll_ost_data.track_id ~= track_id ) then
+		if(( pen.c.mrshll_ost_data.min_frame or 0 ) < frame_num ) then
+			fading = 0
+			if( pen.c.estimator_memo[ "mrshll_ost_fade" ] == 0 ) then
+				pen.c.mrshll_ost_data.track_id = track_id
+				pen.c.mrshll_ost_data.track_memo = is_empty and {} or event
+				local duration = type( event[3]) == "number" and ( event[3] + 10 ) or math.huge
+				pen.c.mrshll_ost_data.min_frame = frame_num + ( is_empty and 30 or
+					math.min( tonumber( GlobalsGetValue( "MRSHLL_OST_DURATION", "600" )), duration ))
+				pen.magic_storage( ost_id, "is_playing", "value_float", 0 )
+				pen.magic_storage( ost_id, "gonna_purge", "value_bool", true )
+			end
+		end
+	else fading = 1 end
+	fading = pen.estimate( "mrshll_ost_fade", { fading, 1 }, "exp50" )
+
+	--store is_biome music data per biome, always start playing on new biome entrance
+	--ensure there's an inherent pause in between biome tracks (support looping tracks)
+
+	pen.t.loop({ "left", "right" }, function( i, v )
+		local speaker = pen.get_child( ost_id, v )
+		if( not( pen.vld( speaker, true ))) then
+			speaker = EntityLoad( "mods/mrshll_core/mrshll/speaker.xml", x, y )
+			EntitySetName( speaker, v )
+			EntityAddChild( ost_id, speaker )
+		end
+		EntitySetTransform( speaker, x + ( i == 1 and -30 or 30 ), y - 10 )
+		
+		local a_comp = EntityGetFirstComponentIncludingDisabled( speaker, "AudioLoopComponent" )
+		if( not( pen.vld( a_comp, true ))) then return end
+		if( ComponentGetIsEnabled( a_comp )) then return end
+		EntitySetComponentIsEnabled( speaker, a_comp, true )
+	end)
+
+	local track = pen.c.mrshll_ost_data.track_memo
+	pen.c.mrshll_ost_purge = pen.c.mrshll_ost_purge or 0
+	if( pen.vld( track )) then
+		pen.debug_print( pen.t.pack( track ), 150, 50, true )
+
+		pen.magic_storage( ost_id, "current_energy", "value_float", energy )
+		local fading_mrshll = tonumber( GlobalsGetValue( "MRSHLL_OST_VOLUME_", "1" ))
+		pen.magic_storage( ost_id, "current_volume", "value_float", 0.251
+			+ 0.749*fading_mrshll*tonumber( GlobalsGetValue( "MRSHLL_OST_VOLUME", "1" ))*fading )
+		if( pen.magic_storage( ost_id, "is_playing", "value_float" ) == 0 ) then
+			if( pen.magic_storage( ost_id, "gonna_purge", "value_bool" )) then
+				pen.magic_storage( ost_id, "gonna_purge", "value_bool", false )
+				pen.c.mrshll_ost_purge = 10
+			end
+			
+			if( pen.c.mrshll_ost_purge == 0 ) then
+				pen.magic_storage( ost_id, "sound_bank", "value_string", track[1])
+				pen.magic_storage( ost_id, "sound_event", "value_string", track[2])
+				pen.magic_storage( ost_id, "is_playing", "value_float",
+					type( track[3]) == "number" and ( track[3] + 90 ) or 999999999 )
+			else
+				pen.c.mrshll_ost_purge = pen.c.mrshll_ost_purge - 1
+				if( pen.c.mrshll_ost_purge == 5 ) then
+					pen.t.loop({"left","right"}, function( i, v )
+						pen.magic_comp( pen.get_child( ost_id, v ), "AudioLoopComponent", function( comp_id, v, is_enabled )
+							ComponentSetValue2( comp_id, "file", "" )
+							ComponentSetValue2( comp_id, "event_name", "" )
+							ComponentSetValue2( comp_id, "m_volume", 0 )
+							ComponentSetValue2( comp_id, "volume_autofade_speed", 1 )
+						end)
+					end)
+				end
+			end
+		end
+	else pen.magic_storage( ost_id, "is_playing", "value_float", 0 ) end
+	
+	if( frame_num%600 ~= 0 ) then return end
+	GameTriggerMusicFadeOutAndDequeueAll( 1000 )
+	GameTriggerMusicEvent( "music/silence/01", false, x, y )
 end
 
 function OnPlayerSpawned( hooman )

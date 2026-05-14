@@ -1,6 +1,7 @@
 {d3d376b6-af21-4ae3-917c-3e8fb781b724} bank:/Master Bank
 {4bce5662-de5a-06a1-1735-b4714672b1bc} bank:/Master Bank.strings
 {6b1065d1-8abe-4deb-a841-ef04b920f8d7} bank:/mrshll
+{f91c7875-92a8-4144-827b-9eba7d5a2294} bank:/silence
 {fd1ec6a6-24b7-4a2e-9988-9733b99dc81e} bus:/
 {ab2beddd-fa07-445b-a933-d5cca76adb6e} bus:/UNASSIGNED 2
 {1a5d4dc3-8fc9-4261-a499-f3f6b0202e17} bus:/UNASSIGNED 3
@@ -21,6 +22,7 @@
 {cdc2e164-5071-4075-80ff-7b75cc0affa6} event:/ass/tab_switch
 {49fcc672-ec86-4ba5-b7db-19dc1ee89ea2} event:/default_l
 {57bd12f6-21d8-4642-ae94-6027488216b1} event:/default_r
+{f181cd0b-1d67-4e7f-bf2c-a94a9177a791} event:/music/silence/01
 {da290cac-e139-4b99-b883-ce1fc690a283} parameter:/Distance
 {2f99f806-4b51-4b0a-a879-566644591f29} parameter:/Migration Name Conflict (3)/lowpass
 {ddf75d16-bdbe-4460-908b-0a29bd483835} parameter:/lowpass
