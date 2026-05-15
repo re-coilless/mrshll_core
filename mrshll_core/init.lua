@@ -31,6 +31,7 @@ function OnWorldPreUpdate()
 		return
 	end
 
+	dofile_once( "mods/mnee/lib.lua" )
 	local queue = pen.t.pack( GlobalsGetValue( "MRSHLL_OST_QUEUE", "" ))
 	if( not( pen.vld( queue ))) then return end
 
@@ -59,14 +60,18 @@ function OnWorldPreUpdate()
 	
 	local event = {}
 	local is_biome = true
+	local frame_num = GameGetFrameNum()
+	local cam_x, cam_y = GameGetCameraPos()
+	pen.c.mrshll_ost_data = pen.c.mrshll_ost_data or {}
+	pen.c.mrshll_ost_biome = pen.c.mrshll_ost_biome or {}
+	local biome_id = DebugBiomeMapGetFilename( cam_x, cam_y )
 	local track_override = pen.t.pack( GlobalsGetValue( "MRSHLL_OST_FORCED", "" ))
 	if( pen.vld( track_override )) then
 		event = track_override
 		is_biome = false
 	else
-		local cam_x, cam_y = GameGetCameraPos()
 		local biome_name = BiomeMapGetName( cam_x, cam_y )
-		local _,_,biome_file = string.find( DebugBiomeMapGetFilename( cam_x, cam_y ), "^.+/(.-).xml$" )
+		local _,_,biome_file = string.find( biome_id, "^.+/(.-).xml$" )
 		local track_data = pen.t.loop( pen.t.order( playlist ), function( i,v )
 			if( not( pen.ghf( v.is_active, { energy, biome_name, biome_file }))) then return end
 			if( energy < v.energy[1] or energy > v.energy[2]) then return end
@@ -94,7 +99,7 @@ function OnWorldPreUpdate()
 
 		if( pen.vld( track_data.name )) then
 			GlobalsSetValue( "MRSHLL_OST_NAME", track_data.name ) end
-		event = track_data.event
+		event = pen.ghf( track_data.event, { energy, biome_name, biome_file })
 	end
 	
 	local x, y = EntityGetTransform( hooman )
@@ -104,10 +109,8 @@ function OnWorldPreUpdate()
 	else EntitySetTransform( ost_id, x, y ) end
 
 	local fading, track_id = 1, ""
-	local frame_num = GameGetFrameNum()
 	local is_empty = not( pen.vld( event ))
 	pen.c.estimator_memo = pen.c.estimator_memo or {}
-	pen.c.mrshll_ost_data = pen.c.mrshll_ost_data or {}
 	if( not( is_empty )) then track_id = event[1]..event[2] end
 	if( pen.c.mrshll_ost_data.track_id ~= track_id ) then
 		if(( pen.c.mrshll_ost_data.min_frame or 0 ) < frame_num ) then
@@ -124,9 +127,6 @@ function OnWorldPreUpdate()
 		end
 	else fading = 1 end
 	fading = pen.estimate( "mrshll_ost_fade", { fading, 1 }, "exp50" )
-
-	--store is_biome music data per biome, always start playing on new biome entrance
-	--ensure there's an inherent pause in between biome tracks (support looping tracks)
 
 	pen.t.loop({ "left", "right" }, function( i, v )
 		local speaker = pen.get_child( ost_id, v )
@@ -146,8 +146,6 @@ function OnWorldPreUpdate()
 	local track = pen.c.mrshll_ost_data.track_memo
 	pen.c.mrshll_ost_purge = pen.c.mrshll_ost_purge or 0
 	if( pen.vld( track )) then
-		pen.debug_print( pen.t.pack( track ), 150, 50, true )
-
 		pen.magic_storage( ost_id, "current_energy", "value_float", energy )
 		local fading_mrshll = tonumber( GlobalsGetValue( "MRSHLL_OST_VOLUME_", "1" ))
 		pen.magic_storage( ost_id, "current_volume", "value_float", 0.251
@@ -159,10 +157,20 @@ function OnWorldPreUpdate()
 			end
 			
 			if( pen.c.mrshll_ost_purge == 0 ) then
-				pen.magic_storage( ost_id, "sound_bank", "value_string", track[1])
-				pen.magic_storage( ost_id, "sound_event", "value_string", track[2])
-				pen.magic_storage( ost_id, "is_playing", "value_float",
-					type( track[3]) == "number" and ( track[3] + 90 ) or 999999999 )
+				if( not( is_biome ) or ( pen.c.mrshll_ost_biome[ biome_id ] or 0 ) < frame_num ) then
+					pen.magic_storage( ost_id, "sound_bank", "value_string", track[1])
+					pen.magic_storage( ost_id, "sound_event", "value_string", track[2])
+					pen.magic_storage( ost_id, "is_playing", "value_float",
+						type( track[3]) == "number" and ( track[3] + 90 ) or 999999999 )
+					
+					if( is_biome ) then
+						local biome_pause = frame_num + math.random(
+							tonumber( GlobalsGetValue( "MRSHLL_OST_BIOME_MIN", "2000" )),
+							tonumber( GlobalsGetValue( "MRSHLL_OST_BIOME_MAX", "20000" )))
+						if( type( track[3] ) == "number" ) then biome_pause = biome_pause + track[3] end
+						pen.c.mrshll_ost_biome[ biome_id ] = biome_pause
+					end
+				end
 			else
 				pen.c.mrshll_ost_purge = pen.c.mrshll_ost_purge - 1
 				if( pen.c.mrshll_ost_purge == 5 ) then
