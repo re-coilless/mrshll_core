@@ -126,7 +126,7 @@ function OnWorldPreUpdate()
 			end
 		end
 	else fading = 1 end
-	fading = pen.estimate( "mrshll_ost_fade", { fading, 1 }, "exp50" )
+	fading = pen.estimate( "mrshll_ost_fade", { fading, 1 }, "exp0.02" )
 
 	pen.t.loop({ "left", "right" }, function( i, v )
 		local speaker = pen.get_child( ost_id, v )
