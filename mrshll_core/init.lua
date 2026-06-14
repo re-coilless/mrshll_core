@@ -58,8 +58,8 @@ function OnWorldPreUpdate()
 		energy = tonumber( energy ) or 0
 	end
 	
-	local event = {}
 	local is_biome = true
+	local event, name = {}, ""
 	local frame_num = GameGetFrameNum()
 	local cam_x, cam_y = GameGetCameraPos()
 	pen.c.mrshll_ost_data = pen.c.mrshll_ost_data or {}
@@ -73,14 +73,14 @@ function OnWorldPreUpdate()
 		local biome_name = BiomeMapGetName( cam_x, cam_y )
 		local _,_,biome_file = string.find( biome_id, "^.+/(.-).xml$" )
 		local track_data = pen.t.loop( pen.t.order( playlist ), function( i,v )
-			if( not( pen.ghf( v.is_active, { energy, biome_name, biome_file }))) then return end
-			if( energy < v.energy[1] or energy > v.energy[2]) then return end
+			if( not( pen.ghf( v.is_active, { cam_x, cam_y, v, energy, biome_name, biome_file }))) then return end
+			if( pen.vld( v.energy ) and ( energy < v.energy[1] or energy > v.energy[2])) then return end
 			local name_check = pen.t.get( pen.ght( v.biome_name ), biome_name )
 			local file_check = pen.t.get( pen.ght( v.biome_file ), biome_file )
 			if( name_check == 0 and file_check == 0 ) then return end
 			return pen.t.clone( v )
 		end) or { event = {}}
-
+		
 		pen.t.loop( EntityGetWithTag( "mrshll_ost_marker" ), function( i,marker_id )
 			local storage = pen.magic_storage( marker_id, "mrshll_ost_marker" )
 			if( not( pen.vld( storage, true ))) then return end
@@ -97,9 +97,8 @@ function OnWorldPreUpdate()
 			end
 		end)
 
-		if( pen.vld( track_data.name )) then
-			GlobalsSetValue( "MRSHLL_OST_NAME", track_data.name ) end
-		event = pen.ghf( track_data.event, { energy, biome_name, biome_file })
+		name = track_data.name
+		event = pen.ghf( track_data.event, { cam_x, cam_y, track_data, energy, biome_name, biome_file }) or {}
 	end
 	
 	local x, y = EntityGetTransform( hooman )
@@ -111,16 +110,14 @@ function OnWorldPreUpdate()
 	local fading, track_id = 1, ""
 	local is_empty = not( pen.vld( event ))
 	pen.c.estimator_memo = pen.c.estimator_memo or {}
-	if( not( is_empty )) then track_id = event[1]..event[2] end
+	if( not( is_empty )) then
+		track_id = event[1]..( type( event[2]) == "table" and event[2][1] or event[2]) end
 	if( pen.c.mrshll_ost_data.track_id ~= track_id ) then
 		if(( pen.c.mrshll_ost_data.min_frame or 0 ) < frame_num ) then
 			fading = 0
 			if( pen.c.estimator_memo[ "mrshll_ost_fade" ] == 0 ) then
 				pen.c.mrshll_ost_data.track_id = track_id
 				pen.c.mrshll_ost_data.track_memo = is_empty and {} or event
-				local duration = type( event[3]) == "number" and ( event[3] + 10 ) or math.huge
-				pen.c.mrshll_ost_data.min_frame = frame_num + ( is_empty and 30 or
-					math.min( tonumber( GlobalsGetValue( "MRSHLL_OST_DURATION", "600" )), duration ))
 				pen.magic_storage( ost_id, "is_playing", "value_float", 0 )
 				pen.magic_storage( ost_id, "gonna_purge", "value_bool", true )
 			end
@@ -143,6 +140,8 @@ function OnWorldPreUpdate()
 		EntitySetComponentIsEnabled( speaker, a_comp, true )
 	end)
 
+	--the pause between biome tracks should be shortened based on energy
+
 	local track = pen.c.mrshll_ost_data.track_memo
 	pen.c.mrshll_ost_purge = pen.c.mrshll_ost_purge or 0
 	if( pen.vld( track )) then
@@ -158,22 +157,51 @@ function OnWorldPreUpdate()
 			
 			if( pen.c.mrshll_ost_purge == 0 ) then
 				if( not( is_biome ) or ( pen.c.mrshll_ost_biome[ biome_id ] or 0 ) < frame_num ) then
+					local num = 1
+					local actual_name = name
+					local actual_event = track[2]
+					local actual_duration = track[3]
+					if( type( actual_event ) == "table" ) then
+						local playlist = pen.t.unarray( pen.t.pack(
+							pen.magic_storage( ost_id, "playlist", "value_string", nil, "" )))
+						num = pen.generic_random( 1, #actual_event )
+
+						if( playlist[ actual_event[ num ]] ~= nil ) then
+							local is_done = true
+							for i,v in ipairs( actual_event ) do
+								if( playlist[ v ] == nil ) then is_done, num = false, i; break end
+							end
+							if( is_done ) then playlist = {} end
+						end
+
+						playlist[ actual_event[ num ]] = 1
+						actual_event = actual_event[ num ]
+						actual_name, actual_duration = actual_name[ num ], actual_duration[ num ]
+						pen.magic_storage( ost_id, "playlist", "value_string", pen.t.pack( pen.t.unarray( playlist )))
+					end
+					
+					local duration = type( actual_duration ) == "number" and ( actual_duration + 10 ) or math.huge
+					pen.c.mrshll_ost_data.min_frame = frame_num + ( is_empty and 30 or
+						math.min( tonumber( GlobalsGetValue( "MRSHLL_OST_DURATION", "600" )), duration ))
 					pen.magic_storage( ost_id, "sound_bank", "value_string", track[1])
-					pen.magic_storage( ost_id, "sound_event", "value_string", track[2])
+					pen.magic_storage( ost_id, "sound_event", "value_string", actual_event )
 					pen.magic_storage( ost_id, "is_playing", "value_float",
-						type( track[3]) == "number" and ( track[3] + 90 ) or 999999999 )
+						type( actual_duration ) == "number" and ( actual_duration + 90 ) or 999999999 )
+					GlobalsSetValue( "MRSHLL_OST_NAME", actual_name )
 					
 					if( is_biome ) then
 						local biome_pause = frame_num + math.random(
 							tonumber( GlobalsGetValue( "MRSHLL_OST_BIOME_MIN", "2000" )),
 							tonumber( GlobalsGetValue( "MRSHLL_OST_BIOME_MAX", "20000" )))
-						if( type( track[3] ) == "number" ) then biome_pause = biome_pause + track[3] end
+						if( type( actual_duration ) == "number" ) then
+							biome_pause = biome_pause + actual_duration end
 						pen.c.mrshll_ost_biome[ biome_id ] = biome_pause
 					end
 				end
 			else
 				pen.c.mrshll_ost_purge = pen.c.mrshll_ost_purge - 1
 				if( pen.c.mrshll_ost_purge == 5 ) then
+					GlobalsSetValue( "MRSHLL_OST_NAME", "" )
 					pen.t.loop({"left","right"}, function( i, v )
 						pen.magic_comp( pen.get_child( ost_id, v ), "AudioLoopComponent", function( comp_id, v, is_enabled )
 							ComponentSetValue2( comp_id, "file", "" )
@@ -204,9 +232,21 @@ function OnPlayerSpawned( hooman )
 	
 	local mode = ModSettingGetNextValue( "mrshll_core.ITEM_INIT" )
 	if( mode > 3 ) then return end
+
+	local content = dofile( "mods/mrshll_core/mrshll_list.lua" )
+	if( pen.t.count( content ) == 1 ) then
+		for i,v in pairs( content ) do
+			if( pen.t.count( v ) == 1 ) then return end
+		end
+	end
+
 	local x, y = EntityGetTransform( hooman )
-	local override = ModIsEnabled( "white_room" ) and mode < 3
-	if( override ) then x, y = 1727, 5328 end
+	local override = GlobalsGetValue( "MARSHALL_SPAWN_OVERRIDE" )
+	if( override == "NOPE" ) then
+		return else override = pen.t.pack( override ) end
+	if( pen.vld( override ) and mode < 3 ) then
+		x, y = override[1], override[2]; override = true
+	else override = false end
 	
 	local controller = EntityLoad( "mods/mrshll_core/mrshll/item.xml", x, y )
 	if( ModIsEnabled( "index_core" )) then
@@ -306,7 +346,6 @@ function OnPlayerSpawned( hooman )
 		-- })
 
 		if( override ) then
-			GamePrint( "::Injection Protocol Override:: Destination set to [THE CHAMBER]" )
 			EntitySetTransform( controller, x, y, 0, -1, 1 )
 		elseif( mode == 1 ) then
 			GamePickUpInventoryItem( hooman, controller, false )

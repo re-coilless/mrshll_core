@@ -15,6 +15,7 @@ end
 
 GUI_STRUCT.custom.mrshll_core = function( screen_w, screen_h, xys )
 	index_mrshll_id = EntityGetWithName( "mrshll_ctrl" )
+	if( not( pen.vld( index_mrshll_id, true ))) then return end
 	dofile( "mods/mrshll_core/mrshll/controller.lua" )
 	return pen.t.pack( pen.setting_get( "mrshll_core.UI_POS" ))
 end
