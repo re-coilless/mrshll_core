@@ -164,7 +164,7 @@ function OnWorldPreUpdate()
 					if( type( actual_event ) == "table" ) then
 						local playlist = pen.t.unarray( pen.t.pack(
 							pen.magic_storage( ost_id, "playlist", "value_string", nil, "" )))
-						num = pen.generic_random( 1, #actual_event )
+						num = pen.random( 1, #actual_event )
 
 						if( playlist[ actual_event[ num ]] ~= nil ) then
 							local is_done = true

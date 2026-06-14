@@ -257,7 +257,7 @@ if( mrshll.gonna_play ) then
 		
 		if( mrshll.switch_delay == 0 ) then
 			if( mrshll.num_override > 0 ) then num = mrshll.num_override; mrshll.num_override = 0 end
-			num = ( num == 0 and ( is_shuffled and pen.generic_random( 1, #this_ordered ) or ( mrshll.last_played + 1 )) or num )
+			num = ( num == 0 and ( is_shuffled and pen.random( 1, #this_ordered ) or ( mrshll.last_played + 1 )) or num )
 			if( num > #this_ordered ) then num = 1 end
 
 			local storage_played = pen.magic_storage( entity_id, "playlist" )
