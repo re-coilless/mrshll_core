@@ -1,5 +1,5 @@
 local GLOBAL_MODES, GLOBAL_MUTATORS, APPLETS, BOSS_BARS,
-	WAND_STATS, SPELL_STATS, MATTER_DESCS, ITEM_CATS, GUI_STRUCT = unpack( index.STRUCT )
+	WAND_STATS, SPELL_STATS, MATTER_DESCS, ITEM_CATS, GUI_MODULES, GUI_STRUCT = unpack( index.STRUCT )
 
 if( ModSettingGetNextValue( "mrshll_core.ITEM_INIT" ) == 3 ) then
 	table.insert( APPLETS.l, {
@@ -13,7 +13,7 @@ if( ModSettingGetNextValue( "mrshll_core.ITEM_INIT" ) == 3 ) then
 	})
 end
 
-GUI_STRUCT.custom.mrshll_core = function( screen_w, screen_h, xys )
+GUI_MODULES.custom.mrshll_core = function( xD, xM, screen_w, screen_h, pos )
 	index_mrshll_id = EntityGetWithName( "mrshll_ctrl" )
 	if( not( pen.vld( index_mrshll_id, true ))) then return end
 	dofile( "mods/mrshll_core/mrshll/controller.lua" )
